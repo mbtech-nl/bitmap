@@ -1,0 +1,22 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`floydSteinberg > snapshot: 16x8 gradient matches known dithered output 1`] = `
+[
+  250,
+  128,
+  246,
+  168,
+  250,
+  144,
+  238,
+  160,
+  250,
+  128,
+  237,
+  84,
+  246,
+  128,
+  250,
+  168,
+]
+`;
