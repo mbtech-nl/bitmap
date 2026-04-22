@@ -1,0 +1,13 @@
+- [x] 1. Bootstrap repo
+- [ ] 2. Implement `src/types.ts`
+- [ ] 3. Implement `src/font/font8x8.ts`
+- [ ] 4. Implement `src/encode.ts` and tests
+- [ ] 5. Implement `src/font/render.ts` and tests
+- [ ] 6. Implement `src/dither.ts` and tests
+- [ ] 7. Implement `src/transform.ts` and tests
+- [ ] 8. Implement `src/image.ts` and tests
+- [ ] 9. Wire exports in `src/index.ts`
+- [ ] 10. Run full test suite and coverage thresholds
+- [ ] 11. Run build and verify `dist/`
+- [ ] 12. Finalize `README.md`
+- [ ] 13. Verify CI command chain locally
