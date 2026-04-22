@@ -1,7 +1,7 @@
 - [x] 1. Bootstrap repo
 - [x] 2. Implement `src/types.ts`
 - [x] 3. Implement `src/font/font8x8.ts`
-- [ ] 4. Implement `src/encode.ts` and tests
+- [x] 4. Implement `src/encode.ts` and tests
 - [ ] 5. Implement `src/font/render.ts` and tests
 - [ ] 6. Implement `src/dither.ts` and tests
 - [ ] 7. Implement `src/transform.ts` and tests
