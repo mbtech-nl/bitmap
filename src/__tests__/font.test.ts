@@ -76,6 +76,14 @@ describe('renderText', () => {
     expect(inverted).not.toEqual(normal);
   });
 
+  it('renders asymmetric glyph rows without horizontal mirroring', () => {
+    const bmp = renderText('J');
+    // "J" top row in font8x8 is 0x78, which should map to 0x1e in output bytes.
+    expect(bmp.data[0]).toBe(0x1e);
+    // "J" bottom hook row in font8x8 is 0x1e, which should map to 0x78 in output bytes.
+    expect(bmp.data[6]).toBe(0x78);
+  });
+
   it('snapshot: HELLO at scale 1 matches known byte output', () => {
     expect(Array.from(renderText('HELLO').data)).toMatchSnapshot();
   });

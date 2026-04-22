@@ -75,7 +75,8 @@ export function renderText(text: string, options: TextRenderOptions = {}): Label
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const glyphRow = fontData[glyphOffset + row]!;
       for (let col = 0; col < metrics.charWidth; col += 1) {
-        const on = (glyphRow >> (7 - col)) & 1;
+        // font8x8 stores row bits least-significant-bit first (left-to-right)
+        const on = (glyphRow >> col) & 1;
         if (on === 0) {
           continue;
         }

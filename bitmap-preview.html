@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bitmap Preview</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+      }
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+      }
+      .controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: center;
+        margin-bottom: 16px;
+      }
+      label {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+      #outCanvas {
+        border: 1px solid #888;
+        image-rendering: pixelated;
+      }
+      .hint {
+        margin-top: 8px;
+        color: #666;
+        font-size: 0.9rem;
+      }
+      pre {
+        background: rgba(127, 127, 127, 0.15);
+        padding: 10px;
+        border-radius: 6px;
+        overflow-x: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Bitmap Render Preview</h1>
+    <h2>Image Render Test</h2>
+    <div class="controls">
+      <label>
+        Source image
+        <input id="fileInput" type="file" accept="image/*" />
+      </label>
+      <label>
+        Threshold
+        <input id="thresholdInput" type="range" min="0" max="255" value="128" />
+        <span id="thresholdValue">128</span>
+      </label>
+      <label><input id="ditherInput" type="checkbox" /> Dither</label>
+      <label><input id="invertInput" type="checkbox" /> Invert</label>
+      <label>
+        Rotate
+        <select id="rotateInput">
+          <option value="0">0</option>
+          <option value="90">90</option>
+          <option value="180">180</option>
+          <option value="270">270</option>
+        </select>
+      </label>
+      <button id="renderBtn" type="button">Render</button>
+    </div>
+
+    <h2>Text Render Test</h2>
+    <div class="controls">
+      <label>
+        Text
+        <input id="textInput" type="text" value="HELLO BITMAP" />
+      </label>
+      <label>
+        Scale X
+        <input id="scaleXInput" type="number" min="1" step="1" value="1" />
+      </label>
+      <label>
+        Scale Y
+        <input id="scaleYInput" type="number" min="1" step="1" value="1" />
+      </label>
+      <label>
+        Letter spacing
+        <input id="letterSpacingInput" type="number" min="0" step="1" value="1" />
+      </label>
+      <label><input id="textInvertInput" type="checkbox" /> Invert text</label>
+      <button id="renderTextBtn" type="button">Render Text</button>
+    </div>
+
+    <canvas id="outCanvas"></canvas>
+    <p class="hint">The canvas shows decoded bitmap bits (1 = black, 0 = white).</p>
+
+    <h2>Stats</h2>
+    <pre id="stats">No image loaded yet.</pre>
+
+    <script type="module">
+      import { renderImage, renderText } from './dist/index.js';
+
+      /** @type {HTMLInputElement} */
+      const fileInput = document.getElementById('fileInput');
+      /** @type {HTMLInputElement} */
+      const thresholdInput = document.getElementById('thresholdInput');
+      /** @type {HTMLSpanElement} */
+      const thresholdValue = document.getElementById('thresholdValue');
+      /** @type {HTMLInputElement} */
+      const ditherInput = document.getElementById('ditherInput');
+      /** @type {HTMLInputElement} */
+      const invertInput = document.getElementById('invertInput');
+      /** @type {HTMLSelectElement} */
+      const rotateInput = document.getElementById('rotateInput');
+      /** @type {HTMLButtonElement} */
+      const renderBtn = document.getElementById('renderBtn');
+      /** @type {HTMLInputElement} */
+      const textInput = document.getElementById('textInput');
+      /** @type {HTMLInputElement} */
+      const scaleXInput = document.getElementById('scaleXInput');
+      /** @type {HTMLInputElement} */
+      const scaleYInput = document.getElementById('scaleYInput');
+      /** @type {HTMLInputElement} */
+      const letterSpacingInput = document.getElementById('letterSpacingInput');
+      /** @type {HTMLInputElement} */
+      const textInvertInput = document.getElementById('textInvertInput');
+      /** @type {HTMLButtonElement} */
+      const renderTextBtn = document.getElementById('renderTextBtn');
+      /** @type {HTMLCanvasElement} */
+      const outCanvas = document.getElementById('outCanvas');
+      /** @type {HTMLPreElement} */
+      const stats = document.getElementById('stats');
+
+      let loadedImageData = null;
+
+      thresholdInput.addEventListener('input', () => {
+        thresholdValue.textContent = thresholdInput.value;
+      });
+
+      fileInput.addEventListener('change', async () => {
+        const file = fileInput.files?.[0];
+        if (!file) {
+          loadedImageData = null;
+          stats.textContent = 'No image loaded yet.';
+          return;
+        }
+
+        loadedImageData = await fileToImageData(file);
+        stats.textContent = `Loaded ${file.name}
+input: ${loadedImageData.width}x${loadedImageData.height}
+rgba bytes: ${loadedImageData.data.length}`;
+      });
+
+      renderBtn.addEventListener('click', () => {
+        if (!loadedImageData) {
+          stats.textContent = 'Load an image first.';
+          return;
+        }
+
+        const threshold = Number(thresholdInput.value);
+        const dither = ditherInput.checked;
+        const invert = invertInput.checked;
+        const rotate = Number(rotateInput.value);
+
+        const bitmap = renderImage(loadedImageData, { threshold, dither, invert, rotate });
+        drawBitmapToCanvas(bitmap, outCanvas);
+
+        const bytesPerRow = Math.ceil(bitmap.widthPx / 8);
+        const blackPixels = countBlackPixels(bitmap);
+
+        stats.textContent = `input: ${loadedImageData.width}x${loadedImageData.height}
+bitmap: ${bitmap.widthPx}x${bitmap.heightPx}
+bitmap bytes: ${bitmap.data.length}
+bytes/row: ${bytesPerRow}
+black pixels: ${blackPixels}
+coverage: ${((blackPixels / (bitmap.widthPx * bitmap.heightPx)) * 100).toFixed(2)}%`;
+      });
+
+      renderTextBtn.addEventListener('click', () => {
+        const text = textInput.value;
+        if (text.length === 0) {
+          stats.textContent = 'Enter some text first.';
+          return;
+        }
+
+        const scaleX = Number(scaleXInput.value);
+        const scaleY = Number(scaleYInput.value);
+        const letterSpacing = Number(letterSpacingInput.value);
+        const invert = textInvertInput.checked;
+
+        try {
+          const bitmap = renderText(text, { scaleX, scaleY, letterSpacing, invert });
+          drawBitmapToCanvas(bitmap, outCanvas);
+          const bytesPerRow = Math.ceil(bitmap.widthPx / 8);
+          const blackPixels = countBlackPixels(bitmap);
+          stats.textContent = `text: ${JSON.stringify(text)}
+bitmap: ${bitmap.widthPx}x${bitmap.heightPx}
+bitmap bytes: ${bitmap.data.length}
+bytes/row: ${bytesPerRow}
+black pixels: ${blackPixels}
+coverage: ${((blackPixels / (bitmap.widthPx * bitmap.heightPx)) * 100).toFixed(2)}%`;
+        } catch (error) {
+          stats.textContent = `Text render error: ${error instanceof Error ? error.message : String(error)}`;
+        }
+      });
+
+      /**
+       * @param {{ widthPx: number, heightPx: number, data: Uint8Array }} bitmap
+       * @param {HTMLCanvasElement} canvas
+       */
+      function drawBitmapToCanvas(bitmap, canvas) {
+        canvas.width = bitmap.widthPx;
+        canvas.height = bitmap.heightPx;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          throw new Error('2D canvas context unavailable');
+        }
+        const imageData = ctx.createImageData(bitmap.widthPx, bitmap.heightPx);
+        const rowBytes = Math.ceil(bitmap.widthPx / 8);
+        for (let y = 0; y < bitmap.heightPx; y += 1) {
+          for (let x = 0; x < bitmap.widthPx; x += 1) {
+            const byteIdx = y * rowBytes + Math.floor(x / 8);
+            const bit = 7 - (x % 8);
+            const isBlack = ((bitmap.data[byteIdx] >> bit) & 1) === 1;
+            const v = isBlack ? 0 : 255;
+            const pixelIdx = (y * bitmap.widthPx + x) * 4;
+            imageData.data[pixelIdx] = v;
+            imageData.data[pixelIdx + 1] = v;
+            imageData.data[pixelIdx + 2] = v;
+            imageData.data[pixelIdx + 3] = 255;
+          }
+        }
+        ctx.putImageData(imageData, 0, 0);
+      }
+
+      /**
+       * @param {{ widthPx: number, heightPx: number, data: Uint8Array }} bitmap
+       */
+      function countBlackPixels(bitmap) {
+        const rowBytes = Math.ceil(bitmap.widthPx / 8);
+        let total = 0;
+        for (let y = 0; y < bitmap.heightPx; y += 1) {
+          for (let x = 0; x < bitmap.widthPx; x += 1) {
+            const byteIdx = y * rowBytes + Math.floor(x / 8);
+            const bit = 7 - (x % 8);
+            total += (bitmap.data[byteIdx] >> bit) & 1;
+          }
+        }
+        return total;
+      }
+
+      /**
+       * @param {File} file
+       * @returns {Promise<{ width: number, height: number, data: Uint8Array }>}
+       */
+      async function fileToImageData(file) {
+        const objectUrl = URL.createObjectURL(file);
+        try {
+          const img = await loadImage(objectUrl);
+          const canvas = document.createElement('canvas');
+          canvas.width = img.naturalWidth || img.width;
+          canvas.height = img.naturalHeight || img.height;
+          const ctx = canvas.getContext('2d');
+          if (!ctx) {
+            throw new Error('2D canvas context unavailable');
+          }
+          ctx.drawImage(img, 0, 0);
+          const data = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          return { width: data.width, height: data.height, data: data.data };
+        } finally {
+          URL.revokeObjectURL(objectUrl);
+        }
+      }
+
+      /**
+       * @param {string} src
+       * @returns {Promise<HTMLImageElement>}
+       */
+      function loadImage(src) {
+        return new Promise((resolve, reject) => {
+          const img = new Image();
+          img.onload = () => resolve(img);
+          img.onerror = (err) => reject(err);
+          img.src = src;
+        });
+      }
+    </script>
+  </body>
+</html>
