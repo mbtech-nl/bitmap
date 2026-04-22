@@ -26,7 +26,7 @@ function maskTrailingBits(data: Uint8Array, widthPx: number, heightPx: number): 
   const mask = (0xff << (8 - trailingBits)) & 0xff;
   for (let y = 0; y < heightPx; y += 1) {
     const idx = y * rowBytes + rowBytes - 1;
-    data[idx] &= mask;
+    data[idx]! &= mask;
   }
 }
 
@@ -69,7 +69,7 @@ export function renderText(text: string, options: TextRenderOptions = {}): Label
             const x = (charX + col) * scaleX + sx;
             const y = row * scaleY + sy;
             const idx = y * rowBytes + Math.floor(x / 8);
-            data[idx] |= 1 << (7 - (x % 8));
+            data[idx]! |= 1 << (7 - (x % 8));
           }
         }
       }
@@ -78,7 +78,7 @@ export function renderText(text: string, options: TextRenderOptions = {}): Label
 
   if (invert) {
     for (let i = 0; i < data.length; i += 1) {
-      data[i] = ~data[i] & 0xff;
+      data[i] = ~data[i]! & 0xff;
     }
     maskTrailingBits(data, widthPx, heightPx);
   }

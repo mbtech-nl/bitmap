@@ -52,7 +52,7 @@ export function thresholdToBitmap(
       const isBlack = invert ? !dark : dark;
       if (isBlack) {
         const byteIdx = y * rowBytes + Math.floor(x / 8);
-        data[byteIdx] |= 1 << (7 - (x % 8));
+        data[byteIdx]! |= 1 << (7 - (x % 8));
       }
     }
   }

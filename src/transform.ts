@@ -10,9 +10,9 @@ function setPixel(data: Uint8Array, rowBytes: number, x: number, y: number, blac
   const byteIdx = y * rowBytes + Math.floor(x / 8);
   const bit = 1 << (7 - (x % 8));
   if (black) {
-    data[byteIdx] |= bit;
+    data[byteIdx]! |= bit;
   } else {
-    data[byteIdx] &= ~bit;
+    data[byteIdx]! &= ~bit;
   }
 }
 
@@ -79,7 +79,7 @@ export function invertBitmap(bitmap: LabelBitmap): LabelBitmap {
   for (let y = 0; y < heightPx; y += 1) {
     for (let b = 0; b < rowBytes; b += 1) {
       const idx = y * rowBytes + b;
-      data[idx] = (~data[idx]) & (b === rowBytes - 1 ? mask : 0xff);
+      data[idx] = (~data[idx]!) & (b === rowBytes - 1 ? mask : 0xff);
     }
   }
   return { widthPx, heightPx, data };

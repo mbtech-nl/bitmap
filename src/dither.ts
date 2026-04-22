@@ -34,7 +34,7 @@ export function floydSteinberg(
       const isBlack = invert ? newPixel === 1 : newPixel === 0;
       if (isBlack) {
         const byteIndex = y * rowBytes + Math.floor(x / 8);
-        data[byteIndex] |= 1 << (7 - (x % 8));
+        data[byteIndex]! |= 1 << (7 - (x % 8));
       }
     }
   }

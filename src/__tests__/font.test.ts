@@ -61,7 +61,7 @@ describe('renderText', () => {
     const mask = trailingMask(bmp.widthPx);
     for (let y = 0; y < bmp.heightPx; y += 1) {
       const idx = y * rowBytes + rowBytes - 1;
-      expect(bmp.data[idx] & ~mask).toBe(0);
+      expect((bmp.data[idx] ?? 0) & ~mask).toBe(0);
     }
   });
 

@@ -22,7 +22,7 @@ function fromRows(rows: string[]): ReturnType<typeof createBitmap> {
     for (let x = 0; x < w; x += 1) {
       if (rows[y]![x] === '#') {
         const idx = y * rowBytes + Math.floor(x / 8);
-        bmp.data[idx] |= 1 << (7 - (x % 8));
+        bmp.data[idx]! |= 1 << (7 - (x % 8));
       }
     }
   }
