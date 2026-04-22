@@ -8,6 +8,6 @@
 - [x] 8. Implement `src/image.ts` and tests
 - [x] 9. Wire exports in `src/index.ts`
 - [x] 10. Run full test suite and coverage thresholds
-- [ ] 11. Run build and verify `dist/`
+- [x] 11. Run build and verify `dist/`
 - [ ] 12. Finalize `README.md`
 - [ ] 13. Verify CI command chain locally
