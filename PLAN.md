@@ -62,7 +62,7 @@ bitmap/
 ```
 MIT License
 
-Copyright (c) 2025 Mannes Bruggink
+Copyright (c) 2025 Mannes Brak
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -103,7 +103,7 @@ export default [...mbtech];
   "version": "0.1.0",
   "description": "Shared 1bpp bitmap rendering core for thermal label printers",
   "license": "MIT",
-  "author": "Mannes Bruggink",
+  "author": "Mannes Brak",
   "homepage": "https://github.com/mbtech-nl/bitmap",
   "repository": {
     "type": "git",
@@ -1342,7 +1342,7 @@ Work in this exact order once configs are published.
 
 ```
 1. Bootstrap repo:
-   - LICENSE  (MIT, copyright Mannes Bruggink, current year)
+   - LICENSE  (MIT, copyright Mannes Brak, current year)
    - .gitignore  (node_modules, dist, coverage, *.log, .DS_Store)
    - package.json  (as specified in section 1)
    - eslint.config.js  (import and spread @mbtech-nl/eslint-config)
