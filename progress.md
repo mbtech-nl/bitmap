@@ -1,5 +1,5 @@
 - [x] 1. Bootstrap repo
-- [ ] 2. Implement `src/types.ts`
+- [x] 2. Implement `src/types.ts`
 - [ ] 3. Implement `src/font/font8x8.ts`
 - [ ] 4. Implement `src/encode.ts` and tests
 - [ ] 5. Implement `src/font/render.ts` and tests
