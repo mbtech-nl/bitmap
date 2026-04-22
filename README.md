@@ -1,6 +1,9 @@
 # @mbtech-nl/bitmap
 
-Shared 1bpp bitmap rendering core for the MBTech thermal-label ecosystem. This package powers printer drivers and design tooling across the org, including `@mbtech-nl/labelmanager-ts`, `@mbtech-nl/labelwriter-ts`, `@mbtech-nl/brother-ql-ts`, and `@labelkit/designer-core`.
+[![Tests](https://github.com/mbtech-nl/bitmap/actions/workflows/ci.yml/badge.svg)](https://github.com/mbtech-nl/bitmap/actions/workflows/ci.yml)
+[![Coverage](https://codecov.io/gh/mbtech-nl/bitmap/branch/main/graph/badge.svg)](https://codecov.io/gh/mbtech-nl/bitmap)
+
+Shared 1bpp bitmap rendering core for the MBTech thermal-label ecosystem. This package powers printer drivers and design tooling across the org, including `@thermal-label/labelmanager-ts`, `@thermal-label/labelwriter-ts`, `@thermal-label/brother-ql-ts`, and `@labelkit/designer-core`.
 
 ## Install
 
