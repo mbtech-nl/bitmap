@@ -1,6 +1,7 @@
 import { floydSteinberg } from './dither.js';
 import { rotateBitmap } from './transform.js';
-import type { ImageRenderOptions, LabelBitmap, RawImageData } from './types.js';
+// eslint-disable-next-line @typescript-eslint/no-import-type-side-effects
+import { type ImageRenderOptions, type LabelBitmap, type RawImageData } from './types.js';
 
 export function renderImage(image: RawImageData, options: ImageRenderOptions = {}): LabelBitmap {
   if (image.width === 0 || image.height === 0) {
@@ -25,12 +26,16 @@ export function renderImage(image: RawImageData, options: ImageRenderOptions = {
 export function rgbaToLuminance(image: RawImageData): Float32Array {
   const luminance = new Float32Array(image.width * image.height);
   for (let i = 0; i < luminance.length; i += 1) {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const r = image.data[i * 4]!;
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const g = image.data[i * 4 + 1]!;
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const b = image.data[i * 4 + 2]!;
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const a = image.data[i * 4 + 3]! / 255;
-    const lum = (0.2126 * r) + (0.7152 * g) + (0.0722 * b);
-    const composited = ((1 - a) * 255) + (a * lum);
+    const lum = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    const composited = (1 - a) * 255 + a * lum;
     luminance[i] = composited / 255;
   }
   return luminance;
@@ -48,10 +53,12 @@ export function thresholdToBitmap(
   for (let y = 0; y < height; y += 1) {
     for (let x = 0; x < width; x += 1) {
       const idx = y * width + x;
-      const dark = (luminance[idx]! * 255) < threshold;
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      const dark = luminance[idx]! * 255 < threshold;
       const isBlack = invert ? !dark : dark;
       if (isBlack) {
         const byteIdx = y * rowBytes + Math.floor(x / 8);
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         data[byteIdx]! |= 1 << (7 - (x % 8));
       }
     }

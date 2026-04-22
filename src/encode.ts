@@ -1,8 +1,9 @@
-import type { LabelBitmap } from './types.js';
+// eslint-disable-next-line @typescript-eslint/no-import-type-side-effects
+import { type LabelBitmap } from './types.js';
 
 export function getRow(bitmap: LabelBitmap, y: number): Uint8Array {
   if (y < 0 || y >= bitmap.heightPx) {
-    throw new RangeError(`row ${y} out of bounds`);
+    throw new RangeError(`row ${String(y)} out of bounds`);
   }
   const rowBytes = bytesPerRow(bitmap.widthPx);
   return bitmap.data.slice(y * rowBytes, y * rowBytes + rowBytes);
@@ -41,5 +42,8 @@ export function bitmapEquals(a: LabelBitmap, b: LabelBitmap): boolean {
   if (a.data.length !== b.data.length) {
     return false;
   }
-  return a.data.every((byte, index) => byte === b.data[index]);
+  return a.data.every((byte, index) => {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    return byte === b.data[index]!;
+  });
 }

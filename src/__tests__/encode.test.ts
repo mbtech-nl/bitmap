@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
 import { bitmapEquals, createBitmap, getRow, iterRows } from '../encode.js';
-import type { LabelBitmap } from '../types.js';
+// eslint-disable-next-line @typescript-eslint/no-import-type-side-effects
+import { type LabelBitmap } from '../types.js';
 
 function createSampleBitmap(): LabelBitmap {
   return {

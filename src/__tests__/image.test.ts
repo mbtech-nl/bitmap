@@ -2,7 +2,11 @@ import { describe, expect, it } from 'vitest';
 
 import { renderImage } from '../image.js';
 
-function rgba(width: number, height: number, pixels: number[]): { width: number; height: number; data: Uint8Array } {
+function rgba(
+  width: number,
+  height: number,
+  pixels: number[],
+): { width: number; height: number; data: Uint8Array } {
   return { width, height, data: new Uint8Array(pixels) };
 }
 

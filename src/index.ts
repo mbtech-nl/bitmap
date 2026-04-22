@@ -22,4 +22,3 @@ export {
   padBitmap,
 } from './transform.js';
 export { getRow, iterRows, bytesPerRow, createBitmap, bitmapEquals } from './encode.js';
-

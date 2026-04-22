@@ -1,8 +1,10 @@
-import type { LabelBitmap } from './types.js';
+// eslint-disable-next-line @typescript-eslint/no-import-type-side-effects
+import { type LabelBitmap } from './types.js';
 
 export function getPixel(bitmap: LabelBitmap, x: number, y: number): boolean {
   const rowBytes = Math.ceil(bitmap.widthPx / 8);
   const byteIdx = y * rowBytes + Math.floor(x / 8);
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   return ((bitmap.data[byteIdx]! >> (7 - (x % 8))) & 1) === 1;
 }
 
@@ -10,8 +12,10 @@ function setPixel(data: Uint8Array, rowBytes: number, x: number, y: number, blac
   const byteIdx = y * rowBytes + Math.floor(x / 8);
   const bit = 1 << (7 - (x % 8));
   if (black) {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     data[byteIdx]! |= bit;
   } else {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     data[byteIdx]! &= ~bit;
   }
 }
@@ -75,11 +79,12 @@ export function invertBitmap(bitmap: LabelBitmap): LabelBitmap {
   const rowBytes = Math.ceil(widthPx / 8);
   const data = new Uint8Array(bitmap.data);
   const trailingBits = widthPx % 8;
-  const mask = trailingBits === 0 ? 0xff : ((0xff << (8 - trailingBits)) & 0xff);
+  const mask = trailingBits === 0 ? 0xff : (0xff << (8 - trailingBits)) & 0xff;
   for (let y = 0; y < heightPx; y += 1) {
     for (let b = 0; b < rowBytes; b += 1) {
       const idx = y * rowBytes + b;
-      data[idx] = (~data[idx]!) & (b === rowBytes - 1 ? mask : 0xff);
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      data[idx] = ~data[idx]! & (b === rowBytes - 1 ? mask : 0xff);
     }
   }
   return { widthPx, heightPx, data };
@@ -104,7 +109,13 @@ export function scaleBitmap(bitmap: LabelBitmap, targetHeight: number): LabelBit
   return { widthPx: targetWidth, heightPx: targetHeight, data };
 }
 
-export function cropBitmap(bitmap: LabelBitmap, x: number, y: number, widthPx: number, heightPx: number): LabelBitmap {
+export function cropBitmap(
+  bitmap: LabelBitmap,
+  x: number,
+  y: number,
+  widthPx: number,
+  heightPx: number,
+): LabelBitmap {
   if (x < 0 || y < 0) throw new RangeError('x and y must be non-negative');
   if (widthPx < 1 || heightPx < 1) throw new RangeError('widthPx and heightPx must be positive');
   if (x + widthPx > bitmap.widthPx || y + heightPx > bitmap.heightPx) {
@@ -120,16 +131,23 @@ export function cropBitmap(bitmap: LabelBitmap, x: number, y: number, widthPx: n
   return { widthPx, heightPx, data };
 }
 
-export function stackBitmaps(bitmaps: readonly LabelBitmap[], direction: 'horizontal' | 'vertical'): LabelBitmap {
+export function stackBitmaps(
+  bitmaps: readonly LabelBitmap[],
+  direction: 'horizontal' | 'vertical',
+): LabelBitmap {
   if (bitmaps.length === 0) throw new RangeError('bitmaps must not be empty');
   if (bitmaps.length === 1) {
-    const only = bitmaps[0]!;
+    const only = bitmaps[0];
+    if (!only) throw new RangeError('bitmaps must not be empty');
     return { widthPx: only.widthPx, heightPx: only.heightPx, data: new Uint8Array(only.data) };
   }
 
   if (direction === 'horizontal') {
-    const height = bitmaps[0]!.heightPx;
-    if (!bitmaps.every((b) => b.heightPx === height)) throw new RangeError('all heights must match for horizontal stack');
+    const first = bitmaps[0];
+    if (!first) throw new RangeError('bitmaps must not be empty');
+    const height = first.heightPx;
+    if (!bitmaps.every(b => b.heightPx === height))
+      throw new RangeError('all heights must match for horizontal stack');
     const width = bitmaps.reduce((sum, b) => sum + b.widthPx, 0);
     const rowBytes = Math.ceil(width / 8);
     const data = new Uint8Array(height * rowBytes);
@@ -145,8 +163,11 @@ export function stackBitmaps(bitmaps: readonly LabelBitmap[], direction: 'horizo
     return { widthPx: width, heightPx: height, data };
   }
 
-  const width = bitmaps[0]!.widthPx;
-  if (!bitmaps.every((b) => b.widthPx === width)) throw new RangeError('all widths must match for vertical stack');
+  const first = bitmaps[0];
+  if (!first) throw new RangeError('bitmaps must not be empty');
+  const width = first.widthPx;
+  if (!bitmaps.every(b => b.widthPx === width))
+    throw new RangeError('all widths must match for vertical stack');
   const totalHeight = bitmaps.reduce((sum, b) => sum + b.heightPx, 0);
   const rowBytes = Math.ceil(width / 8);
   const data = new Uint8Array(totalHeight * rowBytes);

@@ -1,4 +1,10 @@
-import type { BuiltinFont, FontMetrics, LabelBitmap, TextRenderOptions } from '../types.js';
+// eslint-disable-next-line @typescript-eslint/no-import-type-side-effects
+import {
+  type BuiltinFont,
+  type FontMetrics,
+  type LabelBitmap,
+  type TextRenderOptions,
+} from '../types.js';
 import { FONT_8X8, FONT_8X8_METRICS } from './font8x8.js';
 
 const FONTS = {
@@ -26,6 +32,7 @@ function maskTrailingBits(data: Uint8Array, widthPx: number, heightPx: number): 
   const mask = (0xff << (8 - trailingBits)) & 0xff;
   for (let y = 0; y < heightPx; y += 1) {
     const idx = y * rowBytes + rowBytes - 1;
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     data[idx]! &= mask;
   }
 }
@@ -35,13 +42,19 @@ export function renderText(text: string, options: TextRenderOptions = {}): Label
     throw new RangeError('text must not be empty');
   }
 
-  const { font = 'default8x8', scaleX = 1, scaleY = 1, letterSpacing = 1, invert = false } = options;
+  const {
+    font = 'default8x8',
+    scaleX = 1,
+    scaleY = 1,
+    letterSpacing = 1,
+    invert = false,
+  } = options;
   assertScale('scaleX', scaleX);
   assertScale('scaleY', scaleY);
   assertSpacing(letterSpacing);
 
   const { data: fontData, metrics } = FONTS[font];
-  const chars = [...text].map((c) => {
+  const chars = Array.from(text).map(c => {
     const code = c.codePointAt(0) ?? 32;
     return code >= 32 && code <= 127 ? code : 32;
   });
@@ -53,11 +66,13 @@ export function renderText(text: string, options: TextRenderOptions = {}): Label
   const data = new Uint8Array(heightPx * rowBytes);
 
   for (let charIndex = 0; charIndex < chars.length; charIndex += 1) {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const charCode = chars[charIndex]!;
     const glyphOffset = (charCode - 32) * metrics.charHeight;
     const charX = charIndex * (metrics.charWidth + letterSpacing);
 
     for (let row = 0; row < metrics.charHeight; row += 1) {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const glyphRow = fontData[glyphOffset + row]!;
       for (let col = 0; col < metrics.charWidth; col += 1) {
         const on = (glyphRow >> (7 - col)) & 1;
@@ -69,6 +84,7 @@ export function renderText(text: string, options: TextRenderOptions = {}): Label
             const x = (charX + col) * scaleX + sx;
             const y = row * scaleY + sy;
             const idx = y * rowBytes + Math.floor(x / 8);
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             data[idx]! |= 1 << (7 - (x % 8));
           }
         }
@@ -78,6 +94,7 @@ export function renderText(text: string, options: TextRenderOptions = {}): Label
 
   if (invert) {
     for (let i = 0; i < data.length; i += 1) {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       data[i] = ~data[i]! & 0xff;
     }
     maskTrailingBits(data, widthPx, heightPx);
@@ -86,12 +103,16 @@ export function renderText(text: string, options: TextRenderOptions = {}): Label
   return { widthPx, heightPx, data };
 }
 
-export function measureText(text: string, options: TextRenderOptions = {}): { widthPx: number; heightPx: number } {
+export function measureText(
+  text: string,
+  options: TextRenderOptions = {},
+): { widthPx: number; heightPx: number } {
   const { font = 'default8x8', scaleX = 1, scaleY = 1, letterSpacing = 1 } = options;
   assertScale('scaleX', scaleX);
   assertScale('scaleY', scaleY);
   assertSpacing(letterSpacing);
   const { metrics } = FONTS[font];
-  const baseWidth = text.length === 0 ? 0 : text.length * metrics.charWidth + (text.length - 1) * letterSpacing;
+  const baseWidth =
+    text.length === 0 ? 0 : text.length * metrics.charWidth + (text.length - 1) * letterSpacing;
   return { widthPx: baseWidth * scaleX, heightPx: metrics.charHeight * scaleY };
 }

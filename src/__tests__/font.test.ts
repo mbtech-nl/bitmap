@@ -4,7 +4,7 @@ import { renderText, measureText } from '../font/render.js';
 
 function trailingMask(widthPx: number): number {
   const bits = widthPx % 8;
-  return bits === 0 ? 0xff : ((0xff << (8 - bits)) & 0xff);
+  return bits === 0 ? 0xff : (0xff << (8 - bits)) & 0xff;
 }
 
 describe('renderText', () => {

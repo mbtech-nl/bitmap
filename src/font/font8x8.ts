@@ -1,4 +1,5 @@
-import type { FontMetrics } from '../types.js';
+// eslint-disable-next-line @typescript-eslint/no-import-type-side-effects
+import { type FontMetrics } from '../types.js';
 
 /**
  * Source:
@@ -10,7 +11,7 @@ import type { FontMetrics } from '../types.js';
  *
  * This table maps ASCII 0x20..0x7F (space through DEL), 8 rows per glyph.
  */
-const FONT_8X8_ROWS: ReadonlyArray<ReadonlyArray<number>> = [
+const FONT_8X8_ROWS: readonly (readonly number[])[] = [
   [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00], // 0x20
   [0x18, 0x3c, 0x3c, 0x18, 0x18, 0x00, 0x18, 0x00], // 0x21
   [0x36, 0x36, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00], // 0x22
