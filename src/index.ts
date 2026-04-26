@@ -5,6 +5,8 @@ export type {
   ImageRenderOptions,
   BuiltinFont,
   FontMetrics,
+  DitherMethod,
+  LuminanceWeights,
 } from './types.js';
 
 export { renderText, measureText } from './font/render.js';

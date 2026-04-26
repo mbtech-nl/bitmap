@@ -1,5 +1,68 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
+exports[`atkinson > snapshot: 16x8 horizontal gradient matches known output 1`] = `
+[
+  254,
+  64,
+  251,
+  0,
+  249,
+  160,
+  254,
+  32,
+  246,
+  192,
+  249,
+  16,
+  255,
+  32,
+  244,
+  192,
+]
+`;
+
+exports[`bayer4 > snapshot: 16x8 horizontal gradient matches known output 1`] = `
+[
+  245,
+  0,
+  250,
+  160,
+  213,
+  64,
+  254,
+  168,
+  245,
+  0,
+  250,
+  160,
+  213,
+  64,
+  254,
+  168,
+]
+`;
+
+exports[`bayer8 > snapshot: 16x8 horizontal gradient matches known output 1`] = `
+[
+  213,
+  0,
+  250,
+  160,
+  213,
+  64,
+  254,
+  168,
+  245,
+  0,
+  250,
+  160,
+  213,
+  64,
+  254,
+  168,
+]
+`;
+
 exports[`floydSteinberg > snapshot: 16x8 gradient matches known dithered output 1`] = `
 [
   250,
@@ -18,5 +81,47 @@ exports[`floydSteinberg > snapshot: 16x8 gradient matches known dithered output 
   128,
   250,
   168,
+]
+`;
+
+exports[`jarvis-judice-ninke > snapshot: 16x8 horizontal gradient matches known output 1`] = `
+[
+  254,
+  64,
+  251,
+  32,
+  245,
+  32,
+  251,
+  64,
+  250,
+  144,
+  237,
+  36,
+  251,
+  64,
+  246,
+  72,
+]
+`;
+
+exports[`stucki > snapshot: 16x8 horizontal gradient matches known output 1`] = `
+[
+  253,
+  0,
+  251,
+  96,
+  246,
+  144,
+  250,
+  64,
+  246,
+  144,
+  251,
+  72,
+  236,
+  128,
+  246,
+  160,
 ]
 `;
