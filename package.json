@@ -1,6 +1,6 @@
 {
   "name": "@mbtech-nl/bitmap",
-  "version": "1.0.1",
+  "version": "1.2.0",
   "description": "Shared 1bpp bitmap rendering core for thermal label printers",
   "license": "MIT",
   "author": "Mannes Brak",
