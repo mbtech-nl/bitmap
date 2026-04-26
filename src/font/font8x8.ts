@@ -1,5 +1,4 @@
-// eslint-disable-next-line @typescript-eslint/no-import-type-side-effects
-import { type FontMetrics } from '../types.js';
+import type { FontMetrics } from '../types.js';
 
 /**
  * Source:

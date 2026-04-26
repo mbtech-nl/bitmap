@@ -1,5 +1,4 @@
-// eslint-disable-next-line @typescript-eslint/no-import-type-side-effects
-import { type LabelBitmap } from './types.js';
+import type { LabelBitmap } from './types.js';
 
 export function getRow(bitmap: LabelBitmap, y: number): Uint8Array {
   if (y < 0 || y >= bitmap.heightPx) {

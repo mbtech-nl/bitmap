@@ -1,13 +1,12 @@
 import { atkinson, bayer4, bayer8, floydSteinberg, jarvisJudiceNinke, stucki } from './dither.js';
 import { applyGamma, autoLevels as applyAutoLevels, resolveWeights } from './pipeline.js';
 import { rotateBitmap } from './transform.js';
-// eslint-disable-next-line @typescript-eslint/no-import-type-side-effects
-import {
-  type DitherMethod,
-  type ImageRenderOptions,
-  type LabelBitmap,
-  type LuminanceWeights,
-  type RawImageData,
+import type {
+  DitherMethod,
+  ImageRenderOptions,
+  LabelBitmap,
+  LuminanceWeights,
+  RawImageData,
 } from './types.js';
 
 export type Ditherer = (

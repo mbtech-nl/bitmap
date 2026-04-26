@@ -1,8 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { renderMultiPlaneImage } from '../multiplane.js';
-// eslint-disable-next-line @typescript-eslint/no-import-type-side-effects
-import { type LabelBitmap, type RawImageData } from '../types.js';
+import type { LabelBitmap, RawImageData } from '../types.js';
 
 // ---------- helpers ----------
 

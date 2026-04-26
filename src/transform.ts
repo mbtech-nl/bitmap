@@ -1,5 +1,4 @@
-// eslint-disable-next-line @typescript-eslint/no-import-type-side-effects
-import { type LabelBitmap } from './types.js';
+import type { LabelBitmap } from './types.js';
 
 export function getPixel(bitmap: LabelBitmap, x: number, y: number): boolean {
   const rowBytes = Math.ceil(bitmap.widthPx / 8);

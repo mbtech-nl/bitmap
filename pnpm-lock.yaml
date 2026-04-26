@@ -9,8 +9,8 @@ importers:
   .:
     devDependencies:
       '@mbtech-nl/eslint-config':
-        specifier: ^1.0.0
-        version: 1.0.0(@typescript-eslint/utils@8.59.0(eslint@9.39.4)(typescript@5.5.4))(eslint@9.39.4)(typescript@5.5.4)
+        specifier: ^1.0.1
+        version: 1.0.1(@typescript-eslint/utils@8.59.0(eslint@9.39.4)(typescript@5.5.4))(eslint@9.39.4)(typescript@5.5.4)
       '@mbtech-nl/prettier-config':
         specifier: ^1.0.0
         version: 1.0.0(prettier@3.8.3)
@@ -292,8 +292,8 @@ packages:
   '@jridgewell/trace-mapping@0.3.31':
     resolution: {integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==}
 
-  '@mbtech-nl/eslint-config@1.0.0':
-    resolution: {integrity: sha512-vfG+aX95G4nrmvEYqOGydd35nwv5nRCryo4a3KfN5R1SbHJ26dPHulWJ99BNlVCfW0rn4Te0jfXEfqC/fXfK9g==}
+  '@mbtech-nl/eslint-config@1.0.1':
+    resolution: {integrity: sha512-YXjxS8qC8zl4zC8TD5pD/XLMY3eYldt04lq5YeczLtljBDsvWbqXBmeEbTCQtWFNkDWGwtScbF9G5PHzvIYOCQ==}
     engines: {node: '>=24.0.0'}
     peerDependencies:
       eslint: '>=9.0.0'
@@ -1717,7 +1717,7 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
 
-  '@mbtech-nl/eslint-config@1.0.0(@typescript-eslint/utils@8.59.0(eslint@9.39.4)(typescript@5.5.4))(eslint@9.39.4)(typescript@5.5.4)':
+  '@mbtech-nl/eslint-config@1.0.1(@typescript-eslint/utils@8.59.0(eslint@9.39.4)(typescript@5.5.4))(eslint@9.39.4)(typescript@5.5.4)':
     dependencies:
       '@typescript-eslint/eslint-plugin': 8.59.0(@typescript-eslint/parser@8.59.0(eslint@9.39.4)(typescript@5.5.4))(eslint@9.39.4)(typescript@5.5.4)
       '@typescript-eslint/parser': 8.59.0(eslint@9.39.4)(typescript@5.5.4)

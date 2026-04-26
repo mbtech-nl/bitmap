@@ -1,8 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { atkinson, bayer4, bayer8, floydSteinberg, jarvisJudiceNinke, stucki } from '../dither.js';
-// eslint-disable-next-line @typescript-eslint/no-import-type-side-effects
-import { type LabelBitmap } from '../types.js';
+import type { LabelBitmap } from '../types.js';
 
 type Ditherer = (
   lum: Float32Array,

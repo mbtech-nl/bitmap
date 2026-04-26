@@ -1,5 +1,4 @@
-// eslint-disable-next-line @typescript-eslint/no-import-type-side-effects
-import { type LuminanceWeights } from './types.js';
+import type { LuminanceWeights } from './types.js';
 
 const BT709: readonly [number, number, number] = [0.2126, 0.7152, 0.0722];
 const BT601: readonly [number, number, number] = [0.299, 0.587, 0.114];

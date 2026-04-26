@@ -1,13 +1,12 @@
 import { resolveDither, thresholdToBitmap } from './image.js';
 import { applyGamma, autoLevels as applyAutoLevels } from './pipeline.js';
 import { rotateBitmap } from './transform.js';
-// eslint-disable-next-line @typescript-eslint/no-import-type-side-effects
-import {
-  type LabelBitmap,
-  type MultiPlaneRenderOptions,
-  type PaletteEntry,
-  type PlaneRenderOptions,
-  type RawImageData,
+import type {
+  LabelBitmap,
+  MultiPlaneRenderOptions,
+  PaletteEntry,
+  PlaneRenderOptions,
+  RawImageData,
 } from './types.js';
 
 const RESERVED_NAME = 'white';

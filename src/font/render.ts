@@ -1,10 +1,4 @@
-// eslint-disable-next-line @typescript-eslint/no-import-type-side-effects
-import {
-  type BuiltinFont,
-  type FontMetrics,
-  type LabelBitmap,
-  type TextRenderOptions,
-} from '../types.js';
+import type { BuiltinFont, FontMetrics, LabelBitmap, TextRenderOptions } from '../types.js';
 import { FONT_8X8, FONT_8X8_METRICS } from './font8x8.js';
 
 const FONTS = {
