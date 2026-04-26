@@ -10,7 +10,13 @@ import {
   type RawImageData,
 } from './types.js';
 
-type Ditherer = (lum: Float32Array, w: number, h: number, invert: boolean) => LabelBitmap;
+export type Ditherer = (
+  lum: Float32Array,
+  w: number,
+  h: number,
+  invert: boolean,
+  mask?: Uint8Array,
+) => LabelBitmap;
 
 const DITHERERS: Record<DitherMethod, Ditherer> = {
   'floyd-steinberg': floydSteinberg,
@@ -21,7 +27,7 @@ const DITHERERS: Record<DitherMethod, Ditherer> = {
   bayer8,
 };
 
-function resolveDither(opt: boolean | DitherMethod | undefined): Ditherer | null {
+export function resolveDither(opt: boolean | DitherMethod | undefined): Ditherer | null {
   if (!opt) return null;
   if (opt === true) return floydSteinberg;
   return DITHERERS[opt];

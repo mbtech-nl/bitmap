@@ -99,6 +99,63 @@ export interface ImageRenderOptions {
   luminanceWeights?: LuminanceWeights;
 }
 
+/**
+ * One ink/foil colour the printer can place on the substrate.
+ *
+ * `name` is used as the key in `renderMultiPlaneImage`'s result object and
+ * must be unique within the palette. The literal `'white'` is reserved for
+ * the implicit substrate background and rejected by validation.
+ */
+export interface PaletteEntry {
+  readonly name: string;
+  /** RGB tuple in 0..255. */
+  readonly rgb: readonly [number, number, number];
+}
+
+/**
+ * Per-plane pre-quantisation overrides. Each field, if omitted, falls back
+ * to `MultiPlaneRenderOptions.defaults`, then to that field's hard default
+ * (e.g. `threshold: 128`, `dither: false`, `gamma: 1`).
+ *
+ * No `invert` field: inverting an individual plane's output would set bits
+ * on background pixels and other planes' pixels, breaking the mutual-
+ * exclusivity guarantee that `renderMultiPlaneImage` is built around.
+ */
+export interface PlaneRenderOptions {
+  threshold?: number;
+  dither?: boolean | DitherMethod;
+  autoLevels?: boolean;
+  gamma?: number;
+}
+
+export interface MultiPlaneRenderOptions {
+  /** Printer's palette. Length ≥ 1, names unique, name !== 'white'. */
+  readonly palette: readonly PaletteEntry[];
+
+  /**
+   * Distance metric used to classify each source pixel to a palette entry.
+   * - `'rgb'` (default): Euclidean distance in 0..255 RGB. Fast and predictable.
+   * - `'lab'`: CIELAB ΔE76 with D65 white. Perceptually correct; small
+   *   per-pixel overhead. Use when palette colours are perceptually close.
+   * @default 'rgb'
+   */
+  colorSpace?: 'rgb' | 'lab';
+
+  /** Defaults applied to every plane unless an entry exists in `planes`. */
+  defaults?: PlaneRenderOptions;
+
+  /** Per-plane overrides keyed by palette entry name. */
+  planes?: Readonly<Record<string, PlaneRenderOptions>>;
+
+  /**
+   * Rotation applied to every plane after threshold/dither, exactly as
+   * in `renderImage`. All planes rotate together — independent rotation
+   * makes no physical sense for a multi-colour print.
+   * @default 0
+   */
+  rotate?: 0 | 90 | 180 | 270;
+}
+
 export type BuiltinFont = 'default8x8';
 
 export interface FontMetrics {

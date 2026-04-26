@@ -77,6 +77,7 @@ function errorDiffusion(
   height: number,
   invert: boolean,
   kernel: ErrorDiffusionKernel,
+  mask?: Uint8Array,
 ): LabelBitmap {
   const pixels = new Float32Array(luminance);
   const rowBytes = Math.ceil(width / 8);
@@ -95,6 +96,14 @@ function errorDiffusion(
         const nx = x + dx;
         const ny = y + dy;
         if (nx < 0 || nx >= width || ny >= height) continue;
+        // mask enforces renderMultiPlaneImage's mutual-exclusivity contract:
+        // error never lands on a pixel classified to a different plane. In
+        // typical inputs error diffusion's self-balancing means outputs are
+        // identical with or without this check (PLAN-multiplane.md §10
+        // 2026-04-27 blocker), but it remains the only hard guarantee for
+        // adversarial luminance buffers — do not remove without revisiting
+        // the contract.
+        if (mask?.[ny * width + nx] === 0) continue;
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         pixels[ny * width + nx]! += error * w;
       }
@@ -116,8 +125,9 @@ export function floydSteinberg(
   width: number,
   height: number,
   invert: boolean,
+  mask?: Uint8Array,
 ): LabelBitmap {
-  return errorDiffusion(luminance, width, height, invert, FLOYD_STEINBERG);
+  return errorDiffusion(luminance, width, height, invert, FLOYD_STEINBERG, mask);
 }
 
 export function atkinson(
@@ -125,8 +135,9 @@ export function atkinson(
   width: number,
   height: number,
   invert: boolean,
+  mask?: Uint8Array,
 ): LabelBitmap {
-  return errorDiffusion(luminance, width, height, invert, ATKINSON);
+  return errorDiffusion(luminance, width, height, invert, ATKINSON, mask);
 }
 
 export function stucki(
@@ -134,8 +145,9 @@ export function stucki(
   width: number,
   height: number,
   invert: boolean,
+  mask?: Uint8Array,
 ): LabelBitmap {
-  return errorDiffusion(luminance, width, height, invert, STUCKI);
+  return errorDiffusion(luminance, width, height, invert, STUCKI, mask);
 }
 
 export function jarvisJudiceNinke(
@@ -143,8 +155,9 @@ export function jarvisJudiceNinke(
   width: number,
   height: number,
   invert: boolean,
+  mask?: Uint8Array,
 ): LabelBitmap {
-  return errorDiffusion(luminance, width, height, invert, JJN);
+  return errorDiffusion(luminance, width, height, invert, JJN, mask);
 }
 
 // Bayer matrices use the (v + 0.5) / N² normalisation so the threshold for
@@ -167,6 +180,12 @@ function ordered(
   invert: boolean,
   matrix: readonly number[],
   matrixSize: 4 | 8,
+  // mask is accepted for signature uniformity with error-diffusion ditherers
+  // but ignored here. Background pixels in renderMultiPlaneImage are set to
+  // luminance 1.0; the maximum Bayer threshold is < 1, so background bits
+  // are never set regardless of mask. See PLAN-multiplane.md §4.
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _mask?: Uint8Array,
 ): LabelBitmap {
   const rowBytes = Math.ceil(width / 8);
   const data = new Uint8Array(height * rowBytes);
@@ -192,8 +211,9 @@ export function bayer4(
   width: number,
   height: number,
   invert: boolean,
+  mask?: Uint8Array,
 ): LabelBitmap {
-  return ordered(luminance, width, height, invert, BAYER_4, 4);
+  return ordered(luminance, width, height, invert, BAYER_4, 4, mask);
 }
 
 export function bayer8(
@@ -201,6 +221,7 @@ export function bayer8(
   width: number,
   height: number,
   invert: boolean,
+  mask?: Uint8Array,
 ): LabelBitmap {
-  return ordered(luminance, width, height, invert, BAYER_8, 8);
+  return ordered(luminance, width, height, invert, BAYER_8, 8, mask);
 }

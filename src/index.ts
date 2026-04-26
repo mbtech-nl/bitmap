@@ -7,10 +7,14 @@ export type {
   FontMetrics,
   DitherMethod,
   LuminanceWeights,
+  PaletteEntry,
+  PlaneRenderOptions,
+  MultiPlaneRenderOptions,
 } from './types.js';
 
 export { renderText, measureText } from './font/render.js';
 export { renderImage } from './image.js';
+export { renderMultiPlaneImage } from './multiplane.js';
 export { floydSteinberg } from './dither.js';
 export {
   getPixel,

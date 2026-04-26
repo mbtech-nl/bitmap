@@ -1,0 +1,77 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`renderMultiPlaneImage > snapshots > snapshot: 3-plane fixture with mixed dithers 1`] = `
+{
+  "black": [
+    3,
+    128,
+    3,
+    128,
+    3,
+    128,
+    3,
+    128,
+  ],
+  "blue": [
+    28,
+    0,
+    28,
+    0,
+    28,
+    0,
+    28,
+    0,
+  ],
+  "red": [
+    224,
+    0,
+    224,
+    0,
+    224,
+    0,
+    224,
+    0,
+  ],
+}
+`;
+
+exports[`renderMultiPlaneImage > snapshots > snapshot: AA red/black fixture, FS dither 1`] = `
+{
+  "black": [
+    254,
+    0,
+    254,
+    0,
+    254,
+    0,
+    254,
+    0,
+    254,
+    0,
+    254,
+    0,
+    254,
+    0,
+    254,
+    0,
+  ],
+  "red": [
+    0,
+    255,
+    0,
+    127,
+    0,
+    255,
+    0,
+    127,
+    0,
+    255,
+    0,
+    127,
+    0,
+    255,
+    0,
+    127,
+  ],
+}
+`;

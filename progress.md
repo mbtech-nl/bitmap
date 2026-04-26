@@ -24,3 +24,15 @@
 - [x] 8. Add `image.test.ts` cases for new options
 - [x] 9. Update README
 - [x] 10. Verify full CI chain locally
+
+## PLAN-multiplane.md (v1.2.0)
+
+- [x] 1. Pre-flight (v1.1 shipped, regression snapshots green)
+- [x] 2. Add `mask?` parameter to `errorDiffusion` + tests
+- [x] 3. Add types (`PaletteEntry`, `PlaneRenderOptions`, `MultiPlaneRenderOptions`)
+- [x] 4. RGB classifier + tests
+- [x] 5. `renderMultiPlaneImage` + per-plane pipeline + mutual-exclusivity tests
+- [x] 6. LAB classification opt-in + tests
+- [x] 7. Wire exports in `src/index.ts`
+- [x] 8. README
+- [x] 9. Verify full CI chain locally

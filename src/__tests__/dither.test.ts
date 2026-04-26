@@ -4,7 +4,13 @@ import { atkinson, bayer4, bayer8, floydSteinberg, jarvisJudiceNinke, stucki } f
 // eslint-disable-next-line @typescript-eslint/no-import-type-side-effects
 import { type LabelBitmap } from '../types.js';
 
-type Ditherer = (lum: Float32Array, w: number, h: number, invert: boolean) => LabelBitmap;
+type Ditherer = (
+  lum: Float32Array,
+  w: number,
+  h: number,
+  invert: boolean,
+  mask?: Uint8Array,
+) => LabelBitmap;
 
 function countBlackPixels(data: Uint8Array, width: number, height: number): number {
   const rowBytes = Math.ceil(width / 8);
@@ -262,5 +268,74 @@ describe.each(BAYER_METHODS)('%s', (_name, dither) => {
     // Stable tiling: re-running gives the exact same bytes.
     const again = dither(lum, 5, 5, false);
     expect(Array.from(bmp.data)).toEqual(Array.from(again.data));
+  });
+});
+
+const ALL_ERROR_DIFFUSION: readonly (readonly [string, Ditherer])[] = [
+  ['floyd-steinberg', floydSteinberg],
+  ['atkinson', atkinson],
+  ['stucki', stucki],
+  ['jarvis-judice-ninke', jarvisJudiceNinke],
+];
+
+describe.each(ALL_ERROR_DIFFUSION)('%s with mask', (_name, dither) => {
+  it('omitting mask is identical to passing all-ones mask', () => {
+    const w = 16;
+    const h = 8;
+    const lum = new Float32Array(w * h);
+    for (let i = 0; i < lum.length; i += 1) lum[i] = (i % 7) / 7;
+    const noMask = dither(lum, w, h, false);
+    const onesMask = dither(lum, w, h, false, new Uint8Array(w * h).fill(1));
+    expect(Array.from(onesMask.data)).toEqual(Array.from(noMask.data));
+  });
+
+  it('all-zero mask: no error diffuses, only direct quantisation drives output', () => {
+    // With every neighbour masked out, there is no error propagation. The
+    // output is a per-pixel hard threshold at 0.5 of the *original* values.
+    const w = 4;
+    const h = 4;
+    const lum = new Float32Array(w * h);
+    for (let i = 0; i < lum.length; i += 1) lum[i] = i % 2 === 0 ? 0.2 : 0.8;
+    const bmp = dither(lum, w, h, false, new Uint8Array(w * h));
+    // Even-index pixels (lum 0.2) are below 0.5 → black bit set.
+    // Odd-index pixels (lum 0.8) are above → no bit set.
+    // Pattern per row: 1010 1010 → 0xA0 (in MSB-first, 4 pixels in top nibble).
+    expect(bmp.data).toEqual(new Uint8Array([0xa0, 0xa0, 0xa0, 0xa0]));
+  });
+
+  it('error does not leak into masked-out neighbours', () => {
+    // Single foreground pixel at (1, 1) with mid-grey luminance. All other
+    // pixels start at luminance 1.0 (would never set a bit on their own) and
+    // are mask-excluded, so they MUST remain bitless after dither.
+    const w = 4;
+    const h = 4;
+    const lum = new Float32Array(w * h).fill(1);
+    lum[1 * w + 1] = 0.4; // below 0.5 → black, error -0.4 would normally leak
+    const mask = new Uint8Array(w * h);
+    mask[1 * w + 1] = 1;
+    const bmp = dither(lum, w, h, false, mask);
+    // Only bit at (1, 1) — byte index 0, bit (7 - 1) = 6 → 0b01000000 = 0x40.
+    expect(bmp.data).toEqual(new Uint8Array([0, 0x40, 0, 0]));
+  });
+});
+
+describe.each(BAYER_METHODS)('%s with mask (signature uniformity)', (_name, dither) => {
+  it('accepts a mask argument and ignores it (background luminance 1.0 is safe)', () => {
+    const w = 4;
+    const h = 4;
+    const lum = new Float32Array(w * h).fill(1); // all-white
+    const mask = new Uint8Array(w * h); // all-zero mask
+    const bmp = dither(lum, w, h, false, mask);
+    expect(Array.from(bmp.data)).toEqual([0, 0, 0, 0]);
+  });
+
+  it('output is identical with mask argument vs without', () => {
+    const w = 8;
+    const h = 8;
+    const lum = new Float32Array(w * h);
+    for (let i = 0; i < lum.length; i += 1) lum[i] = (i % 5) / 5;
+    const a = dither(lum, w, h, false);
+    const b = dither(lum, w, h, false, new Uint8Array(w * h).fill(1));
+    expect(Array.from(a.data)).toEqual(Array.from(b.data));
   });
 });
