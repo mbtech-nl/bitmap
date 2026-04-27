@@ -47,3 +47,6 @@ jobs:
 
       - name: Build
         run: pnpm build
+
+      - name: Docs build (regenerates API + images, fails on drift)
+        run: pnpm docs:build && git diff --exit-code -- docs/public/images

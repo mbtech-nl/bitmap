@@ -41,7 +41,7 @@
 
 - [x] 1. Phase 1 — Scaffold + deploy pipeline
 - [x] 2. Phase 2 — TypeDoc API reference
-- [ ] 3. Phase 3 — Image generation pipeline
+- [x] 3. Phase 3 — Image generation pipeline
 - [ ] 4. Phase 4 — Dither gallery page
 - [ ] 5. Phase 5 — Tone & luminance page
 - [ ] 6. Phase 6 — Multi-plane page + pipeline diagram
