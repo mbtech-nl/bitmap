@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 200" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="14">
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#888"/>
+    </marker>
+    <style>
+      .box { fill: #f6f6f7; stroke: #888; stroke-width: 1.2; rx: 6; }
+      .opt { fill: #fff; stroke: #888; stroke-width: 1.2; stroke-dasharray: 4 3; rx: 6; }
+      .label { fill: #1a1a1a; }
+      .sub { fill: #666; font-size: 11px; }
+      .arrow { stroke: #888; stroke-width: 1.4; fill: none; }
+      @media (prefers-color-scheme: dark) {
+        .box { fill: #2a2a2a; stroke: #aaa; }
+        .opt { fill: #1a1a1a; stroke: #aaa; }
+        .label { fill: #f0f0f0; }
+        .sub { fill: #aaa; }
+        .arrow { stroke: #aaa; }
+        marker#arr path { fill: #aaa; }
+      }
+    </style>
+  </defs>
+
+  <!-- Stage 1: rgba -->
+  <rect class="box" x="20" y="60" width="120" height="48" />
+  <text class="label" x="80" y="84" text-anchor="middle">rgba</text>
+  <text class="sub" x="80" y="100" text-anchor="middle">input</text>
+
+  <!-- Stage 2: luminance(weights) -->
+  <rect class="box" x="170" y="60" width="170" height="48" />
+  <text class="label" x="255" y="84" text-anchor="middle">luminance</text>
+  <text class="sub" x="255" y="100" text-anchor="middle">luminanceWeights</text>
+
+  <!-- Stage 3: autoLevels (optional) -->
+  <rect class="opt" x="370" y="60" width="120" height="48" />
+  <text class="label" x="430" y="84" text-anchor="middle">autoLevels</text>
+  <text class="sub" x="430" y="100" text-anchor="middle">optional</text>
+
+  <!-- Stage 4: gamma (optional) -->
+  <rect class="opt" x="520" y="60" width="100" height="48" />
+  <text class="label" x="570" y="84" text-anchor="middle">gamma</text>
+  <text class="sub" x="570" y="100" text-anchor="middle">optional</text>
+
+  <!-- Stage 5: threshold | dither -->
+  <rect class="box" x="650" y="60" width="170" height="48" />
+  <text class="label" x="735" y="84" text-anchor="middle">threshold | dither</text>
+  <text class="sub" x="735" y="100" text-anchor="middle">required</text>
+
+  <!-- Stage 6: rotate (optional) -->
+  <rect class="opt" x="850" y="60" width="110" height="48" />
+  <text class="label" x="905" y="84" text-anchor="middle">rotate</text>
+  <text class="sub" x="905" y="100" text-anchor="middle">optional</text>
+
+  <!-- Arrows -->
+  <line class="arrow" x1="140" y1="84" x2="170" y2="84" marker-end="url(#arr)" />
+  <line class="arrow" x1="340" y1="84" x2="370" y2="84" marker-end="url(#arr)" />
+  <line class="arrow" x1="490" y1="84" x2="520" y2="84" marker-end="url(#arr)" />
+  <line class="arrow" x1="620" y1="84" x2="650" y2="84" marker-end="url(#arr)" />
+  <line class="arrow" x1="820" y1="84" x2="850" y2="84" marker-end="url(#arr)" />
+
+  <!-- Output -->
+  <text class="sub" x="490" y="160" text-anchor="middle">→ packed 1bpp LabelBitmap</text>
+</svg>
