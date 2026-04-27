@@ -1,7 +1,10 @@
 {
   "permissions": {
     "allow": [
-      "Bash(prettier --check src)"
+      "Bash(prettier --check src)",
+      "Bash(pkill -f 'vitepress dev')",
+      "Bash(echo \"exit: $?\")",
+      "Bash(pkill -KILL -f 'vitepress')"
     ]
   }
 }
