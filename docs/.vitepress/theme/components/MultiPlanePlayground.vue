@@ -50,10 +50,15 @@ const palette = ref<PaletteRow[]>(PRESETS[0]!.palette.map(p => ({ ...p, rgb: [..
 const colorSpace = ref<'rgb' | 'lab'>('rgb');
 const dither = ref<DitherMethod | 'false'>('floyd-steinberg');
 
+// See Playground.vue for the why behind this cap.
+const MAX_DIM = 600;
+
 const sourceImage = ref<{ width: number; height: number; data: Uint8Array } | null>(null);
 const sourceLabel = ref<string>(SOURCE_PRESETS[0]!.label);
+const sourceInfo = ref<{ origW: number; origH: number; w: number; h: number } | null>(null);
 const errorMsg = ref<string>('');
 const planes = ref<Record<string, LabelBitmap>>({});
+const sourceCanvas = ref<HTMLCanvasElement | null>(null);
 const compositeCanvas = ref<HTMLCanvasElement | null>(null);
 const planeRefs = ref<Record<string, HTMLCanvasElement | null>>({});
 const fileInput = ref<HTMLInputElement | null>(null);
@@ -98,22 +103,47 @@ async function loadImageFromUrl(url: string, label: string): Promise<void> {
     img.crossOrigin = 'anonymous';
     img.src = url;
     await img.decode();
+
+    const origW = img.naturalWidth;
+    const origH = img.naturalHeight;
+    const longest = Math.max(origW, origH);
+    const scale = longest > MAX_DIM ? MAX_DIM / longest : 1;
+    const w = Math.max(1, Math.round(origW * scale));
+    const h = Math.max(1, Math.round(origH * scale));
+
     const canvas = document.createElement('canvas');
-    canvas.width = img.naturalWidth;
-    canvas.height = img.naturalHeight;
+    canvas.width = w;
+    canvas.height = h;
     const ctx = canvas.getContext('2d');
     if (!ctx) throw new Error('Could not get 2D context');
-    ctx.drawImage(img, 0, 0);
-    const data = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(img, 0, 0, w, h);
+    const data = ctx.getImageData(0, 0, w, h);
     sourceImage.value = {
-      width: canvas.width,
-      height: canvas.height,
+      width: w,
+      height: h,
       data: new Uint8Array(data.data.buffer.slice(0)),
     };
     sourceLabel.value = label;
+    sourceInfo.value = { origW, origH, w, h };
+    paintSourceToCanvas();
   } catch (e) {
     errorMsg.value = `Could not load image: ${e instanceof Error ? e.message : String(e)}`;
   }
+}
+
+function paintSourceToCanvas(): void {
+  const canvas = sourceCanvas.value;
+  const src = sourceImage.value;
+  if (!canvas || !src) return;
+  canvas.width = src.width;
+  canvas.height = src.height;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+  const out = ctx.createImageData(src.width, src.height);
+  out.data.set(src.data);
+  ctx.putImageData(out, 0, 0);
 }
 
 function onFileChange(e: Event): void {
@@ -344,10 +374,18 @@ onMounted(() => {
 
     <div class="output">
       <div v-if="errorMsg" class="error">{{ errorMsg }}</div>
+      <div v-if="sourceInfo && (sourceInfo.origW !== sourceInfo.w || sourceInfo.origH !== sourceInfo.h)" class="resize-note">
+        resized from {{ sourceInfo.origW }}×{{ sourceInfo.origH }} to {{ sourceInfo.w }}×{{ sourceInfo.h }}
+        (longest side capped at {{ MAX_DIM }}px for live-render performance)
+      </div>
       <div class="grid">
+        <figure class="source-fig">
+          <canvas ref="sourceCanvas" />
+          <figcaption>source</figcaption>
+        </figure>
         <figure>
           <canvas ref="compositeCanvas" />
-          <figcaption>composite</figcaption>
+          <figcaption>composite output</figcaption>
         </figure>
         <figure v-for="entry in validatedPalette ?? []" :key="entry.name">
           <canvas :ref="(el) => setPlaneRef(entry.name, el)" />
@@ -545,5 +583,17 @@ onMounted(() => {
   font-size: 0.85rem;
   font-family: var(--vp-font-family-mono);
   margin-bottom: 8px;
+}
+
+.resize-note {
+  font-size: 0.78rem;
+  color: var(--vp-c-text-3);
+  font-family: var(--vp-font-family-mono);
+  margin-bottom: 8px;
+}
+
+.source-fig figcaption {
+  color: var(--vp-c-text-1);
+  font-weight: 500;
 }
 </style>

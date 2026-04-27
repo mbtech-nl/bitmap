@@ -22,10 +22,18 @@ const autoLevels = ref(false);
 const gamma = ref(1.0);
 const weights = ref<WeightsChoice>('bt709');
 
+// Cap loaded images to MAX_DIM on the longer side. The lib runs every
+// reactive tick (one per slider step), so a 1500×1000 upload would mean
+// 1.5M-pixel re-renders per tick — visibly sluggish. Capping at 600 keeps
+// renders under ~360k pixels, which finishes in single-digit ms.
+const MAX_DIM = 600;
+
 const sourceImage = ref<{ width: number; height: number; data: Uint8Array } | null>(null);
 const sourceLabel = ref<string>('Logo');
+const sourceInfo = ref<{ origW: number; origH: number; w: number; h: number } | null>(null);
 const errorMsg = ref<string>('');
 const outputCanvas = ref<HTMLCanvasElement | null>(null);
+const sourceCanvas = ref<HTMLCanvasElement | null>(null);
 const fileInput = ref<HTMLInputElement | null>(null);
 
 const options = computed<ImageRenderOptions>(() => {
@@ -91,22 +99,50 @@ async function loadImageFromUrl(url: string, label: string): Promise<void> {
     img.crossOrigin = 'anonymous';
     img.src = url;
     await img.decode();
+
+    const origW = img.naturalWidth;
+    const origH = img.naturalHeight;
+    const longest = Math.max(origW, origH);
+    const scale = longest > MAX_DIM ? MAX_DIM / longest : 1;
+    const w = Math.max(1, Math.round(origW * scale));
+    const h = Math.max(1, Math.round(origH * scale));
+
     const canvas = document.createElement('canvas');
-    canvas.width = img.naturalWidth;
-    canvas.height = img.naturalHeight;
+    canvas.width = w;
+    canvas.height = h;
     const ctx = canvas.getContext('2d');
     if (!ctx) throw new Error('Could not get 2D context');
-    ctx.drawImage(img, 0, 0);
-    const data = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    // High-quality downscale: photos compose better through dithering when
+    // the upstream resample preserves smooth gradients. Nearest-neighbour
+    // would alias hard edges.
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(img, 0, 0, w, h);
+    const data = ctx.getImageData(0, 0, w, h);
     sourceImage.value = {
-      width: canvas.width,
-      height: canvas.height,
+      width: w,
+      height: h,
       data: new Uint8Array(data.data.buffer.slice(0)),
     };
     sourceLabel.value = label;
+    sourceInfo.value = { origW, origH, w, h };
+    paintSourceToCanvas();
   } catch (e) {
     errorMsg.value = `Could not load image: ${e instanceof Error ? e.message : String(e)}`;
   }
+}
+
+function paintSourceToCanvas(): void {
+  const canvas = sourceCanvas.value;
+  const src = sourceImage.value;
+  if (!canvas || !src) return;
+  canvas.width = src.width;
+  canvas.height = src.height;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+  const out = ctx.createImageData(src.width, src.height);
+  out.data.set(src.data);
+  ctx.putImageData(out, 0, 0);
 }
 
 function onFileChange(e: Event): void {
@@ -269,8 +305,20 @@ onMounted(() => {
     </div>
 
     <div class="output">
-      <div class="canvas-wrap">
-        <canvas ref="outputCanvas" />
+      <div class="comparison">
+        <figure class="canvas-wrap">
+          <canvas ref="sourceCanvas" />
+          <figcaption>source</figcaption>
+        </figure>
+        <div class="arrow" aria-hidden="true">→</div>
+        <figure class="canvas-wrap">
+          <canvas ref="outputCanvas" />
+          <figcaption>output (1bpp)</figcaption>
+        </figure>
+      </div>
+      <div v-if="sourceInfo && (sourceInfo.origW !== sourceInfo.w || sourceInfo.origH !== sourceInfo.h)" class="resize-note">
+        resized from {{ sourceInfo.origW }}×{{ sourceInfo.origH }} to {{ sourceInfo.w }}×{{ sourceInfo.h }}
+        (longest side capped at {{ MAX_DIM }}px for live-render performance)
       </div>
       <div v-if="errorMsg" class="error">{{ errorMsg }}</div>
       <details class="snippet">
@@ -397,14 +445,25 @@ onMounted(() => {
   gap: 12px;
 }
 
+.comparison {
+  display: flex;
+  gap: 12px;
+  align-items: stretch;
+  flex-wrap: wrap;
+}
+
 .canvas-wrap {
+  flex: 1 1 240px;
+  margin: 0;
   background: #fff;
   border: 1px solid var(--vp-c-divider);
   border-radius: 4px;
   padding: 8px;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 6px;
   min-height: 200px;
   overflow: auto;
 }
@@ -414,6 +473,34 @@ onMounted(() => {
   height: auto;
   image-rendering: pixelated;
   image-rendering: crisp-edges;
+}
+
+.canvas-wrap figcaption {
+  font-size: 0.78rem;
+  color: var(--vp-c-text-2);
+  font-family: var(--vp-font-family-mono);
+}
+
+.arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  color: var(--vp-c-text-3);
+  flex: 0 0 auto;
+}
+
+@media (max-width: 480px) {
+  .arrow {
+    transform: rotate(90deg);
+  }
+}
+
+.resize-note {
+  font-size: 0.78rem;
+  color: var(--vp-c-text-3);
+  font-family: var(--vp-font-family-mono);
+  margin-top: 4px;
 }
 
 .error {
