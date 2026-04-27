@@ -172,13 +172,13 @@ function prng(seed: number): () => number {
 // Fixture generation
 // -----------------------------------------------------------------------------
 
-function makeLogo(width = 320, height = 200): RGBA {
+function makeLogo(width = 240, height = 150): RGBA {
   const img = blankRgba(width, height);
   const cx = (width / 2) | 0;
-  const cy = 80;
+  const cy = 44;
 
   // Hexagonal frame around the badge
-  const hexR = 56;
+  const hexR = 32;
   const hexPoints: [number, number][] = [];
   for (let i = 0; i < 6; i += 1) {
     const a = (Math.PI / 3) * i - Math.PI / 2;
@@ -192,42 +192,41 @@ function makeLogo(width = 320, height = 200): RGBA {
   }
 
   // Inner stripe band — diagonal hatch inside a smaller hex region
-  for (let y = cy - 22; y < cy + 22; y += 1) {
-    const halfW = 28;
+  for (let y = cy - 14; y < cy + 14; y += 1) {
+    const halfW = 18;
     for (let x = cx - halfW; x < cx + halfW; x += 1) {
-      if (((x + y) % 5) === 0) setPx(img, x, y, 0, 0, 0);
+      if ((x + y) % 4 === 0) setPx(img, x, y, 0, 0, 0);
     }
   }
 
-  // A bold filled circle ("dot") inside — the focal point
-  filledCircle(img, cx + 12, cy, 16, 0, 0, 0);
-  // White cutout in the dot — donut effect
-  filledCircle(img, cx + 12, cy, 8, 255, 255, 255);
+  // Donut focal point inside
+  filledCircle(img, cx + 7, cy, 10, 0, 0, 0);
+  filledCircle(img, cx + 7, cy, 5, 255, 255, 255);
 
-  // Three small chevron marks at the bottom of the badge
+  // Three small chevrons at the bottom of the badge
   for (let i = 0; i < 3; i += 1) {
-    const ox = cx - 18 + i * 18;
-    const oy = cy + 32;
-    strokeLine(img, ox, oy, ox + 6, oy + 6, 0, 0, 0);
-    strokeLine(img, ox + 12, oy, ox + 6, oy + 6, 0, 0, 0);
+    const ox = cx - 12 + i * 12;
+    const oy = cy + 18;
+    strokeLine(img, ox, oy, ox + 4, oy + 4, 0, 0, 0);
+    strokeLine(img, ox + 8, oy, ox + 4, oy + 4, 0, 0, 0);
   }
 
-  // Wordmark below
-  const wordmark = renderText('BITMAP', { scaleX: 3, scaleY: 3 });
+  // Wordmark
+  const wordmark = renderText('BITMAP', { scaleX: 2, scaleY: 2 });
   const wx = ((width - wordmark.widthPx) / 2) | 0;
-  const wy = cy + hexR + 18;
+  const wy = cy + hexR + 12;
   drawBitmap(img, wordmark, wx, wy, [0, 0, 0]);
 
   // Tagline
   const tag = renderText('1bpp rendering', { scaleX: 1, scaleY: 1 });
   const tagx = ((width - tag.widthPx) / 2) | 0;
-  const tagy = wy + wordmark.heightPx + 6;
+  const tagy = wy + wordmark.heightPx + 4;
   drawBitmap(img, tag, tagx, tagy, [0, 0, 0]);
 
   return img;
 }
 
-function makeLineArt(width = 320, height = 240): RGBA {
+function makeLineArt(width = 240, height = 180): RGBA {
   const img = blankRgba(width, height);
   // Concentric circles
   const cx = width / 2;
@@ -245,7 +244,7 @@ function makeLineArt(width = 320, height = 240): RGBA {
   return img;
 }
 
-function makePhoto(width = 320, height = 240): RGBA {
+function makePhoto(width = 240, height = 180): RGBA {
   // Synthetic "photo": gradient sky + sun + horizon + textured ground.
   const img = blankRgba(width, height);
   const rng = prng(0xc0ffee);
@@ -301,7 +300,7 @@ function makePhoto(width = 320, height = 240): RGBA {
   return img;
 }
 
-function makeLowContrastScan(width = 320, height = 240): RGBA {
+function makeLowContrastScan(width = 240, height = 180): RGBA {
   // Same photo, but compressed into [80, 160] tonal range.
   const photo = makePhoto(width, height);
   for (let i = 0; i < photo.width * photo.height; i += 1) {
@@ -313,7 +312,7 @@ function makeLowContrastScan(width = 320, height = 240): RGBA {
   return photo;
 }
 
-function makeMultiColourDesign(width = 256, height = 192): RGBA {
+function makeMultiColourDesign(width = 240, height = 180): RGBA {
   // Designed for the realistic Brother QL-800 [black, red] palette: red sun,
   // black mountain silhouettes, black tree silhouettes, red wordmark. No blue
   // — palette colours match source content exactly so both planes render
@@ -321,17 +320,16 @@ function makeMultiColourDesign(width = 256, height = 192): RGBA {
   const img = blankRgba(width, height);
 
   // Red sun in the upper-left
-  filledCircle(img, 60, 60, 30, 204, 0, 0);
+  filledCircle(img, 50, 52, 24, 204, 0, 0);
 
   // Three black triangular mountain silhouettes across the lower half.
-  // Tallest in the middle.
   const mountains: { peakX: number; peakY: number; baseW: number }[] = [
-    { peakX: 50, peakY: 110, baseW: 100 },
-    { peakX: 130, peakY: 80, baseW: 130 },
-    { peakX: 210, peakY: 100, baseW: 110 },
+    { peakX: 40, peakY: 100, baseW: 80 },
+    { peakX: 120, peakY: 70, baseW: 110 },
+    { peakX: 195, peakY: 90, baseW: 90 },
   ];
   for (const m of mountains) {
-    const baseY = height - 12;
+    const baseY = height - 10;
     for (let y = m.peakY; y < baseY; y += 1) {
       const t = (y - m.peakY) / (baseY - m.peakY);
       const halfW = (t * m.baseW) / 2;
@@ -342,26 +340,26 @@ function makeMultiColourDesign(width = 256, height = 192): RGBA {
   }
 
   // Two black tree silhouettes in the foreground (trunk + triangular crown)
-  const trees: { cx: number; baseY: number; height: number }[] = [
-    { cx: 90, baseY: height - 12, height: 36 },
-    { cx: 175, baseY: height - 12, height: 28 },
+  const trees: { cx: number; baseY: number; treeHeight: number }[] = [
+    { cx: 80, baseY: height - 10, treeHeight: 32 },
+    { cx: 165, baseY: height - 10, treeHeight: 24 },
   ];
   for (const tree of trees) {
     // Trunk
-    fillRect(img, tree.cx - 1, tree.baseY - 6, 3, 6, 0, 0, 0);
+    fillRect(img, tree.cx - 1, tree.baseY - 5, 3, 5, 0, 0, 0);
     // Crown — overlapping circles for a soft pine shape
-    filledCircle(img, tree.cx, tree.baseY - tree.height, 7, 0, 0, 0);
-    filledCircle(img, tree.cx - 4, tree.baseY - tree.height + 8, 8, 0, 0, 0);
-    filledCircle(img, tree.cx + 4, tree.baseY - tree.height + 8, 8, 0, 0, 0);
-    filledCircle(img, tree.cx, tree.baseY - tree.height + 16, 9, 0, 0, 0);
+    filledCircle(img, tree.cx, tree.baseY - tree.treeHeight, 6, 0, 0, 0);
+    filledCircle(img, tree.cx - 3, tree.baseY - tree.treeHeight + 7, 7, 0, 0, 0);
+    filledCircle(img, tree.cx + 3, tree.baseY - tree.treeHeight + 7, 7, 0, 0, 0);
+    filledCircle(img, tree.cx, tree.baseY - tree.treeHeight + 14, 8, 0, 0, 0);
   }
 
   // Red SUN wordmark in the upper-right
   const txt = renderText('SUN', { scaleX: 2, scaleY: 2 });
-  drawBitmap(img, txt, width - txt.widthPx - 14, 14, [204, 0, 0]);
+  drawBitmap(img, txt, width - txt.widthPx - 12, 14, [204, 0, 0]);
 
   // Thin red horizontal accent below the wordmark
-  fillRect(img, width - txt.widthPx - 14, 14 + txt.heightPx + 4, txt.widthPx, 2, 204, 0, 0);
+  fillRect(img, width - txt.widthPx - 12, 14 + txt.heightPx + 3, txt.widthPx, 2, 204, 0, 0);
 
   return img;
 }
@@ -622,20 +620,20 @@ function buildMultiPlane(): void {
     { name: 'scarlet', rgb: [220, 60, 20] },
     { name: 'blue', rgb: [40, 60, 180] },
   ];
-  const closeRedsSrc = blankRgba(192, 192);
-  filledCircle(closeRedsSrc, 60, 90, 36, 200, 30, 40);
-  filledCircle(closeRedsSrc, 130, 90, 36, 220, 60, 20);
-  filledCircle(closeRedsSrc, 95, 150, 32, 40, 60, 180);
+  const closeRedsSrc = blankRgba(160, 160);
+  filledCircle(closeRedsSrc, 50, 75, 30, 200, 30, 40);
+  filledCircle(closeRedsSrc, 110, 75, 30, 220, 60, 20);
+  filledCircle(closeRedsSrc, 80, 125, 26, 40, 60, 180);
 
   const separated: readonly PaletteEntry[] = [
     { name: 'red', rgb: [220, 30, 30] },
     { name: 'green', rgb: [30, 160, 60] },
     { name: 'blue', rgb: [40, 60, 200] },
   ];
-  const separatedSrc = blankRgba(192, 192);
-  filledCircle(separatedSrc, 60, 90, 36, 220, 30, 30);
-  filledCircle(separatedSrc, 130, 90, 36, 30, 160, 60);
-  filledCircle(separatedSrc, 95, 150, 32, 40, 60, 200);
+  const separatedSrc = blankRgba(160, 160);
+  filledCircle(separatedSrc, 50, 75, 30, 220, 30, 30);
+  filledCircle(separatedSrc, 110, 75, 30, 30, 160, 60);
+  filledCircle(separatedSrc, 80, 125, 26, 40, 60, 200);
 
   const cases = [
     { dir: 'close-reds', src: closeRedsSrc, palette: closeReds },

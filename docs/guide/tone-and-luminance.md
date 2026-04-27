@@ -17,7 +17,6 @@ renderImage(rgba, { dither: 'floyd-steinberg', autoLevels: true });
 ```
 
 <DitherGallery
-  :columns="3"
   :tiles="[
     { label: 'source (low-contrast)', src: '/images/tone/auto-levels/source.png' },
     { label: 'dither, no autoLevels', src: '/images/tone/auto-levels/before.png' },
@@ -42,7 +41,6 @@ renderImage(rgba, { dither: 'floyd-steinberg', gamma: 0.85 });
 The sweep below holds dither method constant (`floyd-steinberg`) and varies only `gamma`:
 
 <DitherGallery
-  :columns="3"
   :tiles="[
     { label: 'source', src: '/images/tone/gamma/source.png' },
     { label: 'gamma 0.6', src: '/images/tone/gamma/0_6.png' },
@@ -72,7 +70,6 @@ renderImage(rgba, { luminanceWeights: [1, 0, 0] });   // red channel only
 The grid below uses a multi-colour design — sun, mountain, river, logo text — to make the differences visible:
 
 <DitherGallery
-  :columns="3"
   :tiles="[
     { label: 'source (multi-colour)', src: '/images/tone/weights/source.png' },
     { label: 'bt709 (default)', src: '/images/tone/weights/bt709.png' },

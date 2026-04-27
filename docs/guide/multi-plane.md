@@ -31,7 +31,6 @@ const { black, red } = renderMultiPlaneImage(image, {
 Here's the same red+black palette applied to a designed source image. The classification map shows which plane each source pixel was routed to; the per-plane PNGs are how each plane would print on white paper; the composite combines both.
 
 <DitherGallery
-  :columns="3"
   :tiles="[
     { label: 'source (RGB)', src: '/images/multi-plane/source.png' },
     { label: 'classification map', src: '/images/multi-plane/classification.png', caption: 'each pixel coloured by which plane it lands on' },
@@ -78,7 +77,6 @@ For typical two-colour printers (red+black, blue+black, gold+black) RGB is fine.
 With a separated palette like `[red, green, blue]`, RGB and Lab partition the source image *identically* — every pixel ends up in the same plane either way. There's no reason to pay Lab's small overhead.
 
 <DitherGallery
-  :columns="4"
   :tiles="[
     { label: 'source', src: '/images/multi-plane/colorspace/separated/rgb/source.png' },
     { label: 'rgb · plane red', src: '/images/multi-plane/colorspace/separated/rgb/plane-red.png' },
@@ -95,7 +93,6 @@ With a separated palette like `[red, green, blue]`, RGB and Lab partition the so
 The grid below uses a deliberately adversarial palette: a crimson `[200, 30, 40]` and a scarlet `[220, 60, 20]` that sit close in RGB space, plus a blue. The boundary between crimson and scarlet shifts between RGB Euclidean and CIELAB ΔE76 — pixels near the boundary land in different planes depending on which metric you pick. This is exactly the case `colorSpace: 'lab'` exists for.
 
 <DitherGallery
-  :columns="4"
   :tiles="[
     { label: 'source', src: '/images/multi-plane/colorspace/close-reds/rgb/source.png' },
     { label: 'rgb · plane crimson', src: '/images/multi-plane/colorspace/close-reds/rgb/plane-crimson.png' },
