@@ -53,6 +53,11 @@ function blankRgba(width: number, height: number, fill: [number, number, number]
 }
 
 function setPx(img: RGBA, x: number, y: number, r: number, g: number, b: number, a = 255): void {
+  // Floor coordinates: typed-array property writes with float keys silently
+  // no-op (Uint8Array[1.5] = 5 doesn't write to the buffer). Without this,
+  // any caller passing a non-integer x or y silently drops the pixel.
+  x = x | 0;
+  y = y | 0;
   if (x < 0 || y < 0 || x >= img.width || y >= img.height) return;
   const idx = (y * img.width + x) * 4;
   img.data[idx] = r | 0;
@@ -75,6 +80,8 @@ function blendPx(
   b: number,
   alpha: number,
 ): void {
+  x = x | 0;
+  y = y | 0;
   if (x < 0 || y < 0 || x >= img.width || y >= img.height) return;
   const a = Math.max(0, Math.min(1, alpha));
   const idx = (y * img.width + x) * 4;
@@ -165,28 +172,58 @@ function prng(seed: number): () => number {
 // Fixture generation
 // -----------------------------------------------------------------------------
 
-function makeLogo(width = 256, height = 192): RGBA {
+function makeLogo(width = 320, height = 200): RGBA {
   const img = blankRgba(width, height);
-  // Filled diamond
-  const cx = width / 2;
-  const cy = height / 2;
-  const size = Math.min(width, height) * 0.35;
-  for (let y = 0; y < height; y += 1) {
-    for (let x = 0; x < width; x += 1) {
-      const d = Math.abs(x - cx) + Math.abs(y - cy);
-      if (d < size) setPx(img, x, y, 0, 0, 0);
+  const cx = (width / 2) | 0;
+  const cy = 80;
+
+  // Hexagonal frame around the badge
+  const hexR = 56;
+  const hexPoints: [number, number][] = [];
+  for (let i = 0; i < 6; i += 1) {
+    const a = (Math.PI / 3) * i - Math.PI / 2;
+    hexPoints.push([cx + Math.cos(a) * hexR, cy + Math.sin(a) * hexR]);
+  }
+  for (let i = 0; i < 6; i += 1) {
+    const [x0, y0] = hexPoints[i]!;
+    const [x1, y1] = hexPoints[(i + 1) % 6]!;
+    strokeLine(img, x0, y0, x1, y1, 0, 0, 0);
+    strokeLine(img, x0, y0 + 1, x1, y1 + 1, 0, 0, 0);
+  }
+
+  // Inner stripe band — diagonal hatch inside a smaller hex region
+  for (let y = cy - 22; y < cy + 22; y += 1) {
+    const halfW = 28;
+    for (let x = cx - halfW; x < cx + halfW; x += 1) {
+      if (((x + y) % 5) === 0) setPx(img, x, y, 0, 0, 0);
     }
   }
-  // Two thick concentric strokes around it
-  strokeCircle(img, cx | 0, cy | 0, size + 12, 3, 0, 0, 0);
-  strokeCircle(img, cx | 0, cy | 0, size + 22, 1.5, 0, 0, 0);
 
-  // Bundle font text below
-  const text = renderText('BITMAP', { scaleX: 2, scaleY: 2 });
-  // Place text at bottom-center
-  const tx = ((width - text.widthPx) / 2) | 0;
-  const ty = ((height + size + 32) - text.heightPx + 8) | 0;
-  drawBitmap(img, text, tx, ty, [0, 0, 0]);
+  // A bold filled circle ("dot") inside — the focal point
+  filledCircle(img, cx + 12, cy, 16, 0, 0, 0);
+  // White cutout in the dot — donut effect
+  filledCircle(img, cx + 12, cy, 8, 255, 255, 255);
+
+  // Three small chevron marks at the bottom of the badge
+  for (let i = 0; i < 3; i += 1) {
+    const ox = cx - 18 + i * 18;
+    const oy = cy + 32;
+    strokeLine(img, ox, oy, ox + 6, oy + 6, 0, 0, 0);
+    strokeLine(img, ox + 12, oy, ox + 6, oy + 6, 0, 0, 0);
+  }
+
+  // Wordmark below
+  const wordmark = renderText('BITMAP', { scaleX: 3, scaleY: 3 });
+  const wx = ((width - wordmark.widthPx) / 2) | 0;
+  const wy = cy + hexR + 18;
+  drawBitmap(img, wordmark, wx, wy, [0, 0, 0]);
+
+  // Tagline
+  const tag = renderText('1bpp rendering', { scaleX: 1, scaleY: 1 });
+  const tagx = ((width - tag.widthPx) / 2) | 0;
+  const tagy = wy + wordmark.heightPx + 6;
+  drawBitmap(img, tag, tagx, tagy, [0, 0, 0]);
+
   return img;
 }
 
@@ -277,24 +314,55 @@ function makeLowContrastScan(width = 320, height = 240): RGBA {
 }
 
 function makeMultiColourDesign(width = 256, height = 192): RGBA {
+  // Designed for the realistic Brother QL-800 [black, red] palette: red sun,
+  // black mountain silhouettes, black tree silhouettes, red wordmark. No blue
+  // — palette colours match source content exactly so both planes render
+  // cleanly. Demonstrates "designed asset for a real two-colour printer."
   const img = blankRgba(width, height);
-  // Red sun on the left
-  filledCircle(img, 60, 70, 38, 204, 0, 0);
-  // Black mountain silhouette across the middle
-  for (let x = 0; x < width; x += 1) {
-    const h = 80 + Math.sin(x * 0.04) * 30 + Math.sin(x * 0.11) * 10;
-    fillRect(img, x, height - h, 1, h, 0, 0, 0);
-  }
-  // Blue zig-zag river over the mountain
-  for (let x = 0; x < width; x += 1) {
-    const y = height - 30 + Math.sin(x * 0.18) * 8;
-    for (let dy = 0; dy < 4; dy += 1) {
-      setPx(img, x, (y + dy) | 0, 30, 70, 180);
+
+  // Red sun in the upper-left
+  filledCircle(img, 60, 60, 30, 204, 0, 0);
+
+  // Three black triangular mountain silhouettes across the lower half.
+  // Tallest in the middle.
+  const mountains: { peakX: number; peakY: number; baseW: number }[] = [
+    { peakX: 50, peakY: 110, baseW: 100 },
+    { peakX: 130, peakY: 80, baseW: 130 },
+    { peakX: 210, peakY: 100, baseW: 110 },
+  ];
+  for (const m of mountains) {
+    const baseY = height - 12;
+    for (let y = m.peakY; y < baseY; y += 1) {
+      const t = (y - m.peakY) / (baseY - m.peakY);
+      const halfW = (t * m.baseW) / 2;
+      for (let x = m.peakX - halfW; x < m.peakX + halfW; x += 1) {
+        setPx(img, x, y, 0, 0, 0);
+      }
     }
   }
-  // Red text top-right
+
+  // Two black tree silhouettes in the foreground (trunk + triangular crown)
+  const trees: { cx: number; baseY: number; height: number }[] = [
+    { cx: 90, baseY: height - 12, height: 36 },
+    { cx: 175, baseY: height - 12, height: 28 },
+  ];
+  for (const tree of trees) {
+    // Trunk
+    fillRect(img, tree.cx - 1, tree.baseY - 6, 3, 6, 0, 0, 0);
+    // Crown — overlapping circles for a soft pine shape
+    filledCircle(img, tree.cx, tree.baseY - tree.height, 7, 0, 0, 0);
+    filledCircle(img, tree.cx - 4, tree.baseY - tree.height + 8, 8, 0, 0, 0);
+    filledCircle(img, tree.cx + 4, tree.baseY - tree.height + 8, 8, 0, 0, 0);
+    filledCircle(img, tree.cx, tree.baseY - tree.height + 16, 9, 0, 0, 0);
+  }
+
+  // Red SUN wordmark in the upper-right
   const txt = renderText('SUN', { scaleX: 2, scaleY: 2 });
-  drawBitmap(img, txt, width - txt.widthPx - 12, 16, [204, 0, 0]);
+  drawBitmap(img, txt, width - txt.widthPx - 14, 14, [204, 0, 0]);
+
+  // Thin red horizontal accent below the wordmark
+  fillRect(img, width - txt.widthPx - 14, 14 + txt.heightPx + 4, txt.widthPx, 2, 204, 0, 0);
+
   return img;
 }
 
@@ -538,37 +606,62 @@ function buildMultiPlane(): void {
     compositeMultiPlane(src.width, src.height, planes, redBlack),
   );
 
-  // RGB vs Lab on a 3-colour palette where they actually diverge: two
-  // perceptually-close reds.
-  const threeColour: readonly PaletteEntry[] = [
-    { name: 'a', rgb: [200, 30, 40] }, // crimson
-    { name: 'b', rgb: [220, 60, 20] }, // scarlet
-    { name: 'c', rgb: [40, 60, 180] }, // blue
+  // Two contrasting colorspace demos:
+  //
+  //  (1) close-reds: crimson vs scarlet vs blue. Crimson and scarlet are
+  //      perceptually close — the boundary between them moves between RGB
+  //      Euclidean and CIELAB ΔE76. This is where colorSpace: 'lab' earns
+  //      its keep.
+  //
+  //  (2) separated: red vs green vs blue. RGB and Lab partition the source
+  //      identically — both methods give the same planes. Demonstrates that
+  //      Lab is unnecessary (and slightly slower) for typical separated
+  //      palettes; you reach for it only when (1)-style palettes appear.
+  const closeReds: readonly PaletteEntry[] = [
+    { name: 'crimson', rgb: [200, 30, 40] },
+    { name: 'scarlet', rgb: [220, 60, 20] },
+    { name: 'blue', rgb: [40, 60, 180] },
   ];
-  // Build a source image with all three colours.
-  const tri = blankRgba(192, 192);
-  filledCircle(tri, 60, 90, 36, 200, 30, 40);
-  filledCircle(tri, 130, 90, 36, 220, 60, 20);
-  filledCircle(tri, 95, 150, 32, 40, 60, 180);
+  const closeRedsSrc = blankRgba(192, 192);
+  filledCircle(closeRedsSrc, 60, 90, 36, 200, 30, 40);
+  filledCircle(closeRedsSrc, 130, 90, 36, 220, 60, 20);
+  filledCircle(closeRedsSrc, 95, 150, 32, 40, 60, 180);
 
-  for (const space of ['rgb', 'lab'] as const) {
-    const dir = resolve(OUT, `multi-plane/colorspace/${space}`);
-    const tplanes = renderMultiPlaneImage(tri, {
-      palette: threeColour,
-      colorSpace: space,
-      defaults: { dither: 'floyd-steinberg' },
-    });
-    writePng(resolve(dir, 'source.png'), tri);
-    for (const entry of threeColour) {
+  const separated: readonly PaletteEntry[] = [
+    { name: 'red', rgb: [220, 30, 30] },
+    { name: 'green', rgb: [30, 160, 60] },
+    { name: 'blue', rgb: [40, 60, 200] },
+  ];
+  const separatedSrc = blankRgba(192, 192);
+  filledCircle(separatedSrc, 60, 90, 36, 220, 30, 30);
+  filledCircle(separatedSrc, 130, 90, 36, 30, 160, 60);
+  filledCircle(separatedSrc, 95, 150, 32, 40, 60, 200);
+
+  const cases = [
+    { dir: 'close-reds', src: closeRedsSrc, palette: closeReds },
+    { dir: 'separated', src: separatedSrc, palette: separated },
+  ] as const;
+
+  for (const c of cases) {
+    for (const space of ['rgb', 'lab'] as const) {
+      const dir = resolve(OUT, `multi-plane/colorspace/${c.dir}/${space}`);
+      const tplanes = renderMultiPlaneImage(c.src, {
+        palette: c.palette,
+        colorSpace: space,
+        defaults: { dither: 'floyd-steinberg' },
+      });
+      writePng(resolve(dir, 'source.png'), c.src);
+      for (const entry of c.palette) {
+        writePng(
+          resolve(dir, `plane-${entry.name}.png`),
+          bitmapToRgba(tplanes[entry.name]!, [entry.rgb[0], entry.rgb[1], entry.rgb[2]]),
+        );
+      }
       writePng(
-        resolve(dir, `plane-${entry.name}.png`),
-        bitmapToRgba(tplanes[entry.name]!, [entry.rgb[0], entry.rgb[1], entry.rgb[2]]),
+        resolve(dir, 'composite.png'),
+        compositeMultiPlane(c.src.width, c.src.height, tplanes, c.palette),
       );
     }
-    writePng(
-      resolve(dir, 'composite.png'),
-      compositeMultiPlane(tri.width, tri.height, tplanes, threeColour),
-    );
   }
 }
 

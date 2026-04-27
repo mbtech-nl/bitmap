@@ -73,21 +73,41 @@ Notably, `invert` is **not** available on `PlaneRenderOptions`. Inverting an ind
 
 For typical two-colour printers (red+black, blue+black, gold+black) RGB is fine. For three+ colour palettes with similar hues, switch to `'lab'`.
 
-The grid below uses three colours where two are perceptually close (a crimson `[200, 30, 40]` and a scarlet `[220, 60, 20]`, plus a blue). RGB and Lab partition the source image differently:
+### When the choice doesn't matter — well-separated palette
+
+With a separated palette like `[red, green, blue]`, RGB and Lab partition the source image *identically* — every pixel ends up in the same plane either way. There's no reason to pay Lab's small overhead.
 
 <DitherGallery
   :columns="4"
   :tiles="[
-    { label: 'source', src: '/images/multi-plane/colorspace/rgb/source.png' },
-    { label: 'rgb · plane a (crimson)', src: '/images/multi-plane/colorspace/rgb/plane-a.png' },
-    { label: 'rgb · plane b (scarlet)', src: '/images/multi-plane/colorspace/rgb/plane-b.png' },
-    { label: 'rgb · plane c (blue)', src: '/images/multi-plane/colorspace/rgb/plane-c.png' },
-    { label: 'rgb · composite', src: '/images/multi-plane/colorspace/rgb/composite.png' },
-    { label: 'lab · plane a (crimson)', src: '/images/multi-plane/colorspace/lab/plane-a.png' },
-    { label: 'lab · plane b (scarlet)', src: '/images/multi-plane/colorspace/lab/plane-b.png' },
-    { label: 'lab · plane c (blue)', src: '/images/multi-plane/colorspace/lab/plane-c.png' },
+    { label: 'source', src: '/images/multi-plane/colorspace/separated/rgb/source.png' },
+    { label: 'rgb · plane red', src: '/images/multi-plane/colorspace/separated/rgb/plane-red.png' },
+    { label: 'rgb · plane green', src: '/images/multi-plane/colorspace/separated/rgb/plane-green.png' },
+    { label: 'rgb · plane blue', src: '/images/multi-plane/colorspace/separated/rgb/plane-blue.png' },
+    { label: 'lab · plane red', src: '/images/multi-plane/colorspace/separated/lab/plane-red.png' },
+    { label: 'lab · plane green', src: '/images/multi-plane/colorspace/separated/lab/plane-green.png' },
+    { label: 'lab · plane blue', src: '/images/multi-plane/colorspace/separated/lab/plane-blue.png' },
   ]"
 />
+
+### When the choice matters — perceptually-close palette
+
+The grid below uses a deliberately adversarial palette: a crimson `[200, 30, 40]` and a scarlet `[220, 60, 20]` that sit close in RGB space, plus a blue. The boundary between crimson and scarlet shifts between RGB Euclidean and CIELAB ΔE76 — pixels near the boundary land in different planes depending on which metric you pick. This is exactly the case `colorSpace: 'lab'` exists for.
+
+<DitherGallery
+  :columns="4"
+  :tiles="[
+    { label: 'source', src: '/images/multi-plane/colorspace/close-reds/rgb/source.png' },
+    { label: 'rgb · plane crimson', src: '/images/multi-plane/colorspace/close-reds/rgb/plane-crimson.png' },
+    { label: 'rgb · plane scarlet', src: '/images/multi-plane/colorspace/close-reds/rgb/plane-scarlet.png' },
+    { label: 'rgb · plane blue', src: '/images/multi-plane/colorspace/close-reds/rgb/plane-blue.png' },
+    { label: 'lab · plane crimson', src: '/images/multi-plane/colorspace/close-reds/lab/plane-crimson.png' },
+    { label: 'lab · plane scarlet', src: '/images/multi-plane/colorspace/close-reds/lab/plane-scarlet.png' },
+    { label: 'lab · plane blue', src: '/images/multi-plane/colorspace/close-reds/lab/plane-blue.png' },
+  ]"
+/>
+
+The blue plane is identical in both runs — blue is far from both reds in either metric. The crimson and scarlet planes differ near the boundary between the two red circles.
 
 ## Validation
 
