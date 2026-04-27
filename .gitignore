@@ -3,3 +3,9 @@ dist
 coverage
 *.log
 .DS_Store
+
+# Docs
+docs/.vitepress/dist
+docs/.vitepress/cache
+docs/api/
+!docs/api/index.md

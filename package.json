@@ -33,7 +33,13 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "lint": "eslint src",
-    "format": "prettier --write src"
+    "format": "prettier --write src",
+    "docs:images": "node --experimental-strip-types scripts/build-docs-images.ts",
+    "docs:api": "typedoc",
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs",
+    "docs:check-images": "pnpm docs:images && git diff --exit-code -- docs/public/images"
   },
   "devDependencies": {
     "@mbtech-nl/eslint-config": "^1.0.1",
@@ -44,7 +50,9 @@
     "eslint": "^9.0.0",
     "prettier": "^3.0.0",
     "typescript": "~5.5.0",
-    "vitest": "^2.0.0"
+    "vitepress": "^1.6.4",
+    "vitest": "^2.0.0",
+    "vue": "^3.5.33"
   },
   "funding": [
     {

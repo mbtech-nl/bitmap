@@ -36,3 +36,16 @@
 - [x] 7. Wire exports in `src/index.ts`
 - [x] 8. README
 - [x] 9. Verify full CI chain locally
+
+## PLAN-docs.md (docs site v1)
+
+- [x] 1. Phase 1 — Scaffold + deploy pipeline
+- [ ] 2. Phase 2 — TypeDoc API reference
+- [ ] 3. Phase 3 — Image generation pipeline
+- [ ] 4. Phase 4 — Dither gallery page
+- [ ] 5. Phase 5 — Tone & luminance page
+- [ ] 6. Phase 6 — Multi-plane page + pipeline diagram
+- [ ] 7. Phase 7 — Interactive playground
+- [ ] 8. Phase 8 — Recipes
+- [ ] 9. Phase 9 — Slim README.md + landing page polish
+- [ ] 10. Final quality gate (§ 9)
