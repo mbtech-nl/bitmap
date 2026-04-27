@@ -7,7 +7,8 @@
       "Bash(pkill -KILL -f 'vitepress')",
       "Bash(npm pack *)",
       "Bash(gh api *)",
-      "Bash(curl -s https://api.github.com/repos/__TRACKED_VAR__/releases/latest)"
+      "Bash(curl -s https://api.github.com/repos/__TRACKED_VAR__/releases/latest)",
+      "Bash(curl -s \"https://api.github.com/repos/softprops/action-gh-release/releases/latest\")"
     ]
   }
 }
