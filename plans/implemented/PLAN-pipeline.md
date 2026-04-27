@@ -4,7 +4,7 @@
 > one ordered/Bayer dither, plus three pre-quantisation pipeline steps:
 > dynamic remap, gamma correction, and configurable luminance weights.
 >
-> Out of scope: CLAHE, resize. Those are tracked in [PLAN-clahe.md](PLAN-clahe.md).
+> Out of scope: CLAHE, resize. Those are tracked in [PLAN-clahe.md](../backlog/PLAN-clahe.md).
 >
 > Pipeline order after this plan lands:
 >
