@@ -4,7 +4,8 @@
       "Bash(prettier --check src)",
       "Bash(pkill -f 'vitepress dev')",
       "Bash(echo \"exit: $?\")",
-      "Bash(pkill -KILL -f 'vitepress')"
+      "Bash(pkill -KILL -f 'vitepress')",
+      "Bash(npm pack *)"
     ]
   }
 }
