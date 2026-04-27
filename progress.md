@@ -43,7 +43,7 @@
 - [x] 2. Phase 2 — TypeDoc API reference
 - [x] 3. Phase 3 — Image generation pipeline
 - [x] 4. Phase 4 — Dither gallery page
-- [ ] 5. Phase 5 — Tone & luminance page
+- [x] 5. Phase 5 — Tone & luminance page
 - [ ] 6. Phase 6 — Multi-plane page + pipeline diagram
 - [ ] 7. Phase 7 — Interactive playground
 - [ ] 8. Phase 8 — Recipes
