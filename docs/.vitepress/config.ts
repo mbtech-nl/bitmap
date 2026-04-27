@@ -71,7 +71,13 @@ export default defineConfig({
       '/recipes/': [
         {
           text: 'Recipes',
-          items: [{ text: 'Overview', link: '/recipes/' }],
+          items: [
+            { text: 'Overview', link: '/recipes/' },
+            { text: 'Scale a logo to printer width', link: '/recipes/scale-logo-to-printer-width' },
+            { text: 'Stack header above body', link: '/recipes/stack-header-and-body' },
+            { text: 'Render text and image', link: '/recipes/render-text-and-image' },
+            { text: 'Find the right gamma', link: '/recipes/find-the-right-gamma' },
+          ],
         },
       ],
       '/api/': [{ text: 'API reference', link: '/api/' }, ...apiSidebar],

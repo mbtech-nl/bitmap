@@ -46,6 +46,6 @@
 - [x] 5. Phase 5 — Tone & luminance page
 - [x] 6. Phase 6 — Multi-plane page + pipeline diagram
 - [x] 7. Phase 7 — Interactive playground
-- [ ] 8. Phase 8 — Recipes
+- [x] 8. Phase 8 — Recipes
 - [ ] 9. Phase 9 — Slim README.md + landing page polish
 - [ ] 10. Final quality gate (§ 9)
