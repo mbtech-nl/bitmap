@@ -5,7 +5,9 @@
       "Bash(pkill -f 'vitepress dev')",
       "Bash(echo \"exit: $?\")",
       "Bash(pkill -KILL -f 'vitepress')",
-      "Bash(npm pack *)"
+      "Bash(npm pack *)",
+      "Bash(gh api *)",
+      "Bash(curl -s https://api.github.com/repos/__TRACKED_VAR__/releases/latest)"
     ]
   }
 }
