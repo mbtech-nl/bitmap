@@ -31,6 +31,25 @@ function maskTrailingBits(data: Uint8Array, widthPx: number, heightPx: number): 
   }
 }
 
+/**
+ * Render an ASCII string into a packed 1bpp bitmap using the bundled font.
+ *
+ * Each character is rasterised left-to-right with `letterSpacing` pixels of
+ * gap between glyphs. Code points outside `0x20..0x7F` are replaced with
+ * a space (`0x20`).
+ *
+ * @param text - String to render. Must be non-empty.
+ * @param options - Font, scale factors, letter spacing, and invert flag.
+ *   See {@link TextRenderOptions}.
+ * @returns A 1bpp `LabelBitmap` sized to fit the rendered text.
+ * @throws {RangeError} If `text` is empty, or if `scaleX`/`scaleY` is not a
+ *   positive integer, or if `letterSpacing` is not a non-negative integer.
+ *
+ * @example
+ * ```ts
+ * const banner = renderText('HELLO', { scaleX: 2, scaleY: 2 });
+ * ```
+ */
 export function renderText(text: string, options: TextRenderOptions = {}): LabelBitmap {
   if (text.length === 0) {
     throw new RangeError('text must not be empty');
@@ -98,6 +117,15 @@ export function renderText(text: string, options: TextRenderOptions = {}): Label
   return { widthPx, heightPx, data };
 }
 
+/**
+ * Compute the dimensions a {@link renderText} call would produce, without
+ * allocating a bitmap. Empty strings return `{ widthPx: 0, heightPx }`.
+ *
+ * @example
+ * ```ts
+ * const { widthPx, heightPx } = measureText('SKU-1234', { scaleX: 2 });
+ * ```
+ */
 export function measureText(
   text: string,
   options: TextRenderOptions = {},

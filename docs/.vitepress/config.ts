@@ -1,5 +1,18 @@
+import { readFileSync } from 'node:fs';
 import { fileURLToPath, URL } from 'node:url';
-import { defineConfig } from 'vitepress';
+import { defineConfig, type DefaultTheme } from 'vitepress';
+
+const apiSidebar: DefaultTheme.SidebarItem[] = (() => {
+  try {
+    const raw = readFileSync(
+      fileURLToPath(new URL('../api/typedoc-sidebar.json', import.meta.url)),
+      'utf-8',
+    );
+    return JSON.parse(raw) as DefaultTheme.SidebarItem[];
+  } catch {
+    return [{ text: 'API reference', link: '/api/' }];
+  }
+})();
 
 export default defineConfig({
   base: '/bitmap/',
@@ -61,7 +74,7 @@ export default defineConfig({
           items: [{ text: 'Overview', link: '/recipes/' }],
         },
       ],
-      '/api/': [{ text: 'API reference', items: [{ text: 'Overview', link: '/api/' }] }],
+      '/api/': [{ text: 'API reference', link: '/api/' }, ...apiSidebar],
     },
 
     socialLinks: [{ icon: 'github', link: 'https://github.com/mbtech-nl/bitmap' }],

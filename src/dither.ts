@@ -119,6 +119,29 @@ function errorDiffusion(
   return { widthPx: width, heightPx: height, data };
 }
 
+/**
+ * Floyd–Steinberg error-diffusion dither.
+ *
+ * Quantises a normalised luminance buffer (values in `[0, 1]`) to packed
+ * 1bpp output. Kept as a public export for v1.0 compatibility; new code
+ * should pass `dither: 'floyd-steinberg'` to {@link renderImage} instead,
+ * which handles luminance conversion, gamma, and rotation around it.
+ *
+ * @param luminance - Normalised luminance, length `width * height`.
+ * @param width - Image width in pixels.
+ * @param height - Image height in pixels.
+ * @param invert - If `true`, swap black and white in the output.
+ * @param mask - Optional `Uint8Array` (length `width * height`); pixels with
+ *   `mask[i] === 0` neither emit ink nor receive diffused error. Used
+ *   internally by {@link renderMultiPlaneImage} to keep error confined to a
+ *   plane's classified region. Omit for ordinary single-plane dithering.
+ * @returns A 1bpp `LabelBitmap` of dimensions `width × height`.
+ *
+ * @example
+ * ```ts
+ * const bmp = floydSteinberg(luminance, 384, 64, false);
+ * ```
+ */
 export function floydSteinberg(
   luminance: Float32Array,
   width: number,

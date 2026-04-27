@@ -32,6 +32,42 @@ export function resolveDither(opt: boolean | DitherMethod | undefined): Ditherer
   return DITHERERS[opt];
 }
 
+/**
+ * Convert RGBA pixel data to a packed 1bpp bitmap.
+ *
+ * Inside `renderImage` the pipeline runs in this fixed order; each step is
+ * optional:
+ *
+ * ```
+ * rgba → luminance(weights) → autoLevels → gamma → threshold | dither → rotate
+ * ```
+ *
+ * For multi-colour printers (Brother QL-800 with red+black tape, two-colour
+ * DYMO/Zebra), see {@link renderMultiPlaneImage} instead.
+ *
+ * @param image - RGBA pixel data; compatible with browser `ImageData`.
+ * @param options - See {@link ImageRenderOptions}.
+ * @returns A 1bpp `LabelBitmap` whose dimensions match the input (or are
+ *   swapped when `rotate` is 90 or 270).
+ * @throws {RangeError} If image dimensions are zero or `data.length` does
+ *   not match `width * height * 4`. Also if `gamma` is non-finite or
+ *   non-positive, or if a custom `luminanceWeights` tuple has invalid values.
+ *
+ * @example Hard-threshold a logo
+ * ```ts
+ * const bmp = renderImage(rgba, { threshold: 128 });
+ * ```
+ *
+ * @example Atkinson-dither a photo, rotated for portrait printing
+ * ```ts
+ * const bmp = renderImage(rgba, { dither: 'atkinson', rotate: 90 });
+ * ```
+ *
+ * @example Auto-enhance a low-contrast scan
+ * ```ts
+ * const bmp = renderImage(rgba, { autoLevels: true, dither: 'floyd-steinberg' });
+ * ```
+ */
 export function renderImage(image: RawImageData, options: ImageRenderOptions = {}): LabelBitmap {
   if (image.width === 0 || image.height === 0) {
     throw new RangeError('image dimensions must be non-zero');

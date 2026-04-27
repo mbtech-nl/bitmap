@@ -1,5 +1,18 @@
 import type { LabelBitmap } from './types.js';
 
+/**
+ * Read a single pixel from a packed 1bpp bitmap.
+ *
+ * @param bitmap - Source bitmap.
+ * @param x - Column (0-indexed, left-to-right).
+ * @param y - Row (0-indexed, top-to-bottom).
+ * @returns `true` if the pixel is black (bit set), `false` if white.
+ *
+ * @example
+ * ```ts
+ * const isBlack = getPixel(bitmap, 0, 0);
+ * ```
+ */
 export function getPixel(bitmap: LabelBitmap, x: number, y: number): boolean {
   const rowBytes = Math.ceil(bitmap.widthPx / 8);
   const byteIdx = y * rowBytes + Math.floor(x / 8);
@@ -19,6 +32,21 @@ function setPixel(data: Uint8Array, rowBytes: number, x: number, y: number, blac
   }
 }
 
+/**
+ * Rotate a bitmap clockwise by 90, 180, or 270 degrees.
+ *
+ * For 90 and 270 the output dimensions are swapped (`widthPx` and `heightPx`
+ * exchange). For 180 the dimensions are unchanged.
+ *
+ * @param bitmap - Source bitmap.
+ * @param degrees - Rotation amount; `90`, `180`, or `270`.
+ * @returns A new bitmap; the input is not mutated.
+ *
+ * @example
+ * ```ts
+ * const portrait = rotateBitmap(landscape, 90);
+ * ```
+ */
 export function rotateBitmap(bitmap: LabelBitmap, degrees: 90 | 180 | 270): LabelBitmap {
   const { widthPx: w, heightPx: h } = bitmap;
   if (degrees === 180) {
@@ -49,6 +77,16 @@ export function rotateBitmap(bitmap: LabelBitmap, degrees: 90 | 180 | 270): Labe
   return { widthPx: newW, heightPx: newH, data };
 }
 
+/**
+ * Mirror a bitmap left-to-right.
+ *
+ * @returns A new bitmap with each row's pixels reversed.
+ *
+ * @example
+ * ```ts
+ * const mirrored = flipHorizontal(bitmap);
+ * ```
+ */
 export function flipHorizontal(bitmap: LabelBitmap): LabelBitmap {
   const { widthPx: w, heightPx: h } = bitmap;
   const rowBytes = Math.ceil(w / 8);
@@ -61,6 +99,16 @@ export function flipHorizontal(bitmap: LabelBitmap): LabelBitmap {
   return { widthPx: w, heightPx: h, data };
 }
 
+/**
+ * Mirror a bitmap top-to-bottom.
+ *
+ * @returns A new bitmap with rows reversed.
+ *
+ * @example
+ * ```ts
+ * const mirrored = flipVertical(bitmap);
+ * ```
+ */
 export function flipVertical(bitmap: LabelBitmap): LabelBitmap {
   const { widthPx: w, heightPx: h } = bitmap;
   const rowBytes = Math.ceil(w / 8);
@@ -73,6 +121,19 @@ export function flipVertical(bitmap: LabelBitmap): LabelBitmap {
   return { widthPx: w, heightPx: h, data };
 }
 
+/**
+ * Swap black and white pixels.
+ *
+ * Trailing bits in the last byte of each row stay zero (preserves the
+ * `LabelBitmap` invariant that unused bits are always 0).
+ *
+ * @returns A new bitmap with every bit flipped, except trailing padding bits.
+ *
+ * @example
+ * ```ts
+ * const negative = invertBitmap(positive);
+ * ```
+ */
 export function invertBitmap(bitmap: LabelBitmap): LabelBitmap {
   const { widthPx, heightPx } = bitmap;
   const rowBytes = Math.ceil(widthPx / 8);
@@ -89,6 +150,24 @@ export function invertBitmap(bitmap: LabelBitmap): LabelBitmap {
   return { widthPx, heightPx, data };
 }
 
+/**
+ * Resize a bitmap to a target height while preserving aspect ratio.
+ *
+ * Uses nearest-neighbour sampling — appropriate for 1bpp output where any
+ * smoothing would muddy the result. For pre-rasterisation resizing, scale
+ * the source RGBA image instead and pass the result to {@link renderImage}.
+ *
+ * @param bitmap - Source bitmap.
+ * @param targetHeight - Desired height in pixels (positive integer).
+ * @returns A new bitmap. Width is computed as `round(srcW * targetHeight / srcH)`,
+ *   floored to a minimum of 1.
+ * @throws {RangeError} If `targetHeight` is not a positive integer.
+ *
+ * @example
+ * ```ts
+ * const fitted = scaleBitmap(logo, 64);
+ * ```
+ */
 export function scaleBitmap(bitmap: LabelBitmap, targetHeight: number): LabelBitmap {
   if (!Number.isInteger(targetHeight) || targetHeight < 1) {
     throw new RangeError('targetHeight must be a positive integer');
@@ -108,6 +187,22 @@ export function scaleBitmap(bitmap: LabelBitmap, targetHeight: number): LabelBit
   return { widthPx: targetWidth, heightPx: targetHeight, data };
 }
 
+/**
+ * Extract a rectangular sub-region from a bitmap.
+ *
+ * @param bitmap - Source bitmap.
+ * @param x - Left edge of crop, in pixels.
+ * @param y - Top edge of crop, in pixels.
+ * @param widthPx - Crop width in pixels (≥ 1).
+ * @param heightPx - Crop height in pixels (≥ 1).
+ * @returns A new bitmap containing the cropped region.
+ * @throws {RangeError} If the region is out of bounds or has non-positive dimensions.
+ *
+ * @example
+ * ```ts
+ * const header = cropBitmap(label, 0, 0, label.widthPx, 32);
+ * ```
+ */
 export function cropBitmap(
   bitmap: LabelBitmap,
   x: number,
@@ -130,6 +225,23 @@ export function cropBitmap(
   return { widthPx, heightPx, data };
 }
 
+/**
+ * Concatenate bitmaps horizontally or vertically.
+ *
+ * Horizontal stacking requires every input to share the same `heightPx`;
+ * vertical stacking requires every input to share the same `widthPx`.
+ *
+ * @param bitmaps - At least one bitmap to stack.
+ * @param direction - `'horizontal'` (left-to-right) or `'vertical'` (top-to-bottom).
+ * @returns A new bitmap containing the stacked input.
+ * @throws {RangeError} If the input is empty or dimensions don't align.
+ *
+ * @example
+ * ```ts
+ * const labelTop = stackBitmaps([logo, title], 'horizontal');
+ * const fullLabel = stackBitmaps([labelTop, body], 'vertical');
+ * ```
+ */
 export function stackBitmaps(
   bitmaps: readonly LabelBitmap[],
   direction: 'horizontal' | 'vertical',
@@ -182,6 +294,20 @@ export function stackBitmaps(
   return { widthPx: width, heightPx: totalHeight, data };
 }
 
+/**
+ * Add white margins around an existing bitmap.
+ *
+ * Each side defaults to 0; only specify the sides you need.
+ *
+ * @param bitmap - Source bitmap.
+ * @param padding - Margins in pixels per side.
+ * @returns A new bitmap with the original content offset by `padding.left`/`padding.top`.
+ *
+ * @example
+ * ```ts
+ * const padded = padBitmap(content, { top: 4, bottom: 4, left: 8, right: 8 });
+ * ```
+ */
 export function padBitmap(
   bitmap: LabelBitmap,
   padding: { top?: number; right?: number; bottom?: number; left?: number },
