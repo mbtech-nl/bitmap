@@ -39,6 +39,17 @@ For multi-colour printers (Brother QL-800 with red/black tape, two-colour DYMO/Z
 
 For side-by-side visuals of every method, see the [dithering guide](https://mbtech-nl.github.io/bitmap/guide/dithering).
 
+## Also useful for…
+
+Although built for thermal printers, the same primitives fit any pipeline that wants a clean 1bpp input:
+
+- **OCR / document AI** — Tesseract and most classical OCR backends prefer binarised input. `renderImage` with `autoLevels: true` handles low-contrast scans; `dither: false` (hard threshold) preserves character edges.
+- **Barcode / QR preprocessing** — same story; binarisation + nearest-neighbour scaling is exactly what decoders want.
+- **Handwriting recognition / layout analysis** — feed normalised binary frames into downstream classical or ML models.
+- **Multi-colour mask separation** — `renderMultiPlaneImage` produces mutually-exclusive masks per palette colour, useful as a deterministic colour-quantisation step before downstream processing.
+
+Not a fit for general computer-vision preprocessing (CNNs, ViTs, CLIP) — those want full tonal range with bilinear/bicubic resampling, the opposite of what this lib produces. Reach for `torchvision`/`albumentations`/`PIL` there.
+
 ## API at a glance
 
 - `renderText`, `measureText` — render ASCII into 1bpp using the bundled 8×8 font.
